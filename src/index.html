@@ -7,8 +7,33 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style type="text/css">
+html, body { height: 100%; }
+
+.effect-layer {
+  width: 100%;
+  height: 100%;
+}
+
+/*  background : url(表示させる画像のパス) no-repeat 0 0;*/
+div.jojoni {
+  background: url("/assets/jojoni.png");
+  background-size: 100% auto;
+  opacity: 1;
+}
+div.kaizoku {
+  background: url("/assets/kaizoku.png");
+  background-size: 100% auto; 
+  opacity: 1;
+}
+div.fade {
+  opacity: 0;
+}
+  </style>
 </head>
 <body>
-  <app-root></app-root>
+　<div id="slide" class="effect-layer">
+    <app-root></app-root>
+  </div>
 </body>
 </html>

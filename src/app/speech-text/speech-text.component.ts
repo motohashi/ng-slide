@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import * as recognizeMicrophone  from 'watson-speech/speech-to-text/recognize-microphone';
 
 @Component({
@@ -10,7 +10,8 @@ export class SpeechTextComponent implements OnInit {
 
   private isRecording = false
   private recognizeStream = null
-  constructor() { }
+
+  constructor(private detector:ChangeDetectorRef) { }
 
   ngOnInit() {}
 
@@ -38,13 +39,16 @@ export class SpeechTextComponent implements OnInit {
       model: 'ja-JP_BroadbandModel',
       objectMode: true,
       extractResults: true,
-      keywords: ['ドドド','ジョジョ','エフェクト','今です'],
+      keywords: ['徐々に','海賊'],
       keywords_threshold: 0.7,
       outputElement: '#output'
     })
     stream.on('data', data => {
       if (data.final) {
         const transcript = data.alternatives[0].transcript
+ //       this.speech_text = transcript;
+        this.checkEffectedWord(transcript);
+        this.detector.detectChanges();
       }
     })
     this.recognizeStream = stream
@@ -57,5 +61,20 @@ export class SpeechTextComponent implements OnInit {
     }
     this.isRecording = false
     this.recognizeStream = null
+  }
+
+
+  private keywords = [
+    {keyword: '徐々に', class: 'jojoni'},
+    {keyword: '海賊', class: 'kaizoku'},
+  ];
+  checkEffectedWord(word) {
+    let body = document.getElementById('slide');
+    body.className='effect-layer';
+    this.keywords.forEach(obj => {
+      if (word.match(obj.keyword)) {
+        body.classList.add(obj.class);
+      }
+    })
   }
 }
