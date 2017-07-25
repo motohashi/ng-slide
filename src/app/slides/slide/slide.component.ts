@@ -5,7 +5,7 @@ import {SlideBusService} from '../slide-bus.service';
 @Component({
   selector: 'app-slide',
   templateUrl: './slide.component.html',
-  // styleUrls: ['./slides.component.css'],
+  styleUrls: ['./slide.component.css'],
   animations: [
     // trigger('leftLeave', [
     //   transition('* => *', [
@@ -85,7 +85,7 @@ export class SlideComponent {
   // @HostBinding('@leftLeave') left = false;
   // @HostBinding('@rightLeave') right = false;
 
-  @HostBinding('style.background') bgcolor = '#ECF6FF';
+//  @HostBinding('style.background') bgcolor = '#ECF6FF';
 
   @Input('slide')
   set slide(slide: any) {

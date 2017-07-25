@@ -372,7 +372,7 @@ module.exports = {
         "favicon.ico"
       ],
       "globOptions": {
-        "cwd": "/Users/takeo.kusama/kotlin/nyumo/slides/src",
+        "cwd": "/Users/motohashi/Development/ng-slides/src",
         "dot": true,
         "ignore": "**/.gitkeep"
       }

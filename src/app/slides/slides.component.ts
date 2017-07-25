@@ -127,7 +127,7 @@ export class SlidesComponent implements OnInit {
     }
   }
 
-  @HostBinding('style.backgroundcolor') bgcolor = '#ECF6FF';
+  //@HostBinding('style.backgroundcolor') bgcolor = '#ECF6FF';
 
   @HostListener('window:keyup.arrowRight')
   onArrowRight() {

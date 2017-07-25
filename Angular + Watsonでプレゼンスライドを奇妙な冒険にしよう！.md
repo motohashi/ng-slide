@@ -83,8 +83,6 @@ $ curl -X POST -u <service_username>:<service_password> \
 
 ### 4.2 Watson Speech to Textを利用する
 #### token取得
-http://qiita.com/ovrmrw/items/a0b29d6959333c5a746c
-
 [公式サンプル](https://github.com/watson-developer-cloud/speech-to-text-nodejs)よりtoken取得部分を利用しましょう。
 `app.js`で `/api/token`というエンドポイントを提供しています。README通りに`.env`に3項で取得した`username``password`を設定すれば完了です。
 
@@ -163,7 +161,7 @@ Watson Speech to Textから返ってきた文字列を元にスライドにエ�
 
 ```
 
-雑にclassつけます。
+画像を表示するためのclassをセットします。CSSを自由に編集してフェードやいろいろなアニメーションを試してみましょう。
 
 ```speech-text.component.ts
 private keywords = [
@@ -183,11 +181,22 @@ checkEffectedWord(word) {
 
 ## 5 動作確認
 
-画像で確認
-これを
-こうして
-こうなる
-のようなデモを書きます。
+画面で確認してみましょう。
+
+![Screen Shot 2017-07-25 at 21.03.52.png](https://qiita-image-store.s3.amazonaws.com/0/21849/422600aa-c2ea-cf8d-e7a6-6d750543a9a9.png "Screen Shot 2017-07-25 at 21.03.52.png")
+
+左右キーで移動します。
+
+![Screen Shot 2017-07-25 at 21.04.00.png](https://qiita-image-store.s3.amazonaws.com/0/21849/7b029616-d87d-9bce-ca34-11a5a4d28b24.png "Screen Shot 2017-07-25 at 21.04.00.png")
+
+![Screen Shot 2017-07-25 at 21.04.12.png](https://qiita-image-store.s3.amazonaws.com/0/21849/e5aa6e58-47d9-6495-9222-6ce3cbaa513a.png "Screen Shot 2017-07-25 at 21.04.12.png")
+
+このページで「徐々に」というワードを取り込ませます。すると、、
+
+![Screen Shot 2017-07-25 at 21.06.19.png](https://qiita-image-store.s3.amazonaws.com/0/21849/2b7b3b8b-5ad3-fea7-812f-4730dd2a753f.png "Screen Shot 2017-07-25 at 21.06.19.png")
+
+徐々に奇妙な世界が開けました。
+画像やキーワードを変えてオリジナルのスライドを作ってみましょう。
 
 ## 6 終わりに
 

@@ -41,7 +41,6 @@ export class SpeechTextComponent implements OnInit {
       extractResults: true,
       keywords: ['徐々に','海賊'],
       keywords_threshold: 0.7,
-      outputElement: '#output'
     })
     stream.on('data', data => {
       if (data.final) {
@@ -62,17 +61,20 @@ export class SpeechTextComponent implements OnInit {
   }
 
 
-  private keywords = [
-    {keyword: '徐々に', class: 'jojoni'},
-    {keyword: '海賊', class: 'kaizoku'},
-  ];
-  checkEffectedWord(word) {
-    let body = document.getElementById('slide');
-    body.className='effect-layer';
-    this.keywords.forEach(obj => {
-      if (word.match(obj.keyword)) {
-        body.classList.add(obj.class);
-      }
-    })
-  }
+    private keywords = [
+      {keyword: '徐々に', class: 'jojoni'},
+      {keyword: 'ええ', class: 'jojoni'},
+      {keyword: '海賊', class: 'kaizoku'},
+    ];
+    checkEffectedWord(word) {
+      let body = document.getElementById('slide');
+      body.className='effect-layer';
+                console.log(word)
+      this.keywords.forEach(obj => {
+        if (word.match(obj.keyword)) {
+
+          body.classList.add(obj.class);
+        }
+      })
+    }
 }
