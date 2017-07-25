@@ -14,7 +14,7 @@ IBM BluemixのSpeech To Text
 
 - web/フロント: Angular Cli
 - 認証サーバー: typescript + node.js
-- 音声認識: Watson Speech to Text 
+- 音声認識: Watson Speech to Text
 
 ### 2.2 Watson Speech to Text
 Watson Speech to Textは文法や日本語に標準対応した音声の文字書き起こしサービスです。音をそのまま書き起こすのではなく文法や辞書を加味し書き起こすため正確な書き起こしが実現できます。
@@ -80,6 +80,276 @@ $ curl -X POST -u <service_username>:<service_password> \
 それでは実際にスライドを作成してみましょう。
 
 ### 4.1 Angularでスライドを作成する
+
+#### Slideを作るための準備
+
+Slideを作成するためにhtmlファイルを文字列型でimportが出来るように設定します。
+angular-cliのデフォルトの設定ではhtmlをlaw-loaderで読み込むようになっていますが
+そのimport先の型が定まっていないため,importすることができません。そのため,
+
+```
+declare module "*.html" {
+  const content: string;
+  export default content;
+}
+```
+
+
+#### Slideを作るための構成
+
+以下のようなファイル構成でスライド設置用のコンポーネントを作成していきます。
+
+```
+src/app/slides
+├── slide
+│   ├── slide.component.html
+│   ├── slide.component.ts
+│   └── template
+│       ├── 1.html
+│       ├── 2.html
+│       └── 3.html
+├── slide-bus.service.ts
+├── slides.component.css
+├── slides.component.html
+├── slides.component.ts
+├── slides.data.ts
+└── slides.service.ts
+
+```
+
+angular-cli を使用することで、
+`ng g component slides`を実行した後`ng g component slides/slide`を実行することで,
+直接作成する手間を省くことができます。
+
+
+#### 各ファイルの実装
+
+*スライドに対するcssの実装は任意なのでここでは割愛します。
+
+slides.component.tsはスライド全体を管理するコンポーネントです。@HostListenerによってこのコンポーネントにおけるイベントをフックすることができます。ここでは,LeftキーとRightキーにイベントをフックできるようにしています。
+
+```ts
+// slides.component.ts
+import {
+  HostListener,
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit
+} from '@angular/core';
+import {trigger, animate, style, transition, animateChild, group, query, stagger} from '@angular/animations';
+import {SlideBusService} from './slide-bus.service';
+import {SlidesService} from './slides.service';
+import {SlideDirective} from './slide/slide.directive';
+import {SlideComponent} from './slide/slide.component';
+
+@Component({
+  selector: 'app-slides',
+  templateUrl: './slides.component.html',
+  styleUrls: ['./slides.component.css'],
+})
+
+export class SlidesComponent implements OnInit {
+
+  @Input() public slides;
+  currentIndex = 0;
+  selectedSlide = null;
+
+  constructor(private _slideBusService: SlideBusService,
+              private _slideService: SlidesService,
+            ) {
+    this.slides = this._slideService.getAll();
+  }
+
+  ngOnInit() {
+    this.selectSlide(this.currentIndex);
+  }
+
+  selectSlide(slide_id: any) {
+    if ( slide_id !== this.selectedSlide) {
+      this.selectedSlide = slide_id ;
+    }else {
+      this.selectedSlide = null;
+    }
+  }
+
+  @HostListener('window:keyup.arrowRight')
+  onArrowRight() {
+    if (this.currentIndex + 1 < this.slides.length) {
+      this.selectSlide(++this.currentIndex);
+    }
+  }
+
+  @HostListener('window:keyup.arrowLeft')
+  onArrowLeft() {
+    if (this.currentIndex - 1 >= 0) {
+      this.selectSlide(--this.currentIndex);
+    }
+  }
+
+}
+
+```
+
+slides.componentのcurrentIndexというパラメータで現在何ページ目のスライドなのかを管理します。ここで子コンポーネントapp-slideのに対して[html]要素を@Inputに受け渡しています。(*ngIf)によってcurrentIndexとslideに割り当てられた番号が一致した時にslideを表示するようになります。closeは新規に開かれたコンポーネント以外のcomponentに対してコールバックを設定しています。今回はスライドの管理はcurrentIndexの値のみで実現できているので、設定する必要はありませんが,このように親のコンポーネントから必要な関数を@Outputに渡すことで子コンポーネント側で任意のコールバックを設定することができます。
+
+```html
+//slides.component.html
+<ng-container *ngFor="let slide of slides;let i = index;">
+  <app-slide [html]="slide.page" *ngIf="currentIndex==i" (close)="selectSlide(null)" ></app-slide>
+</ng-container>
+```
+
+slide.serviceは,slideのデータを取得するためのクラスです。今回はデータをそのままファイルに保存しているため,データをファイルから読み取るメソッドのみを定義しています。実際の運用では,サーバーなどからデータを取得することもあるため,データをどこから取得するか,どのタイミングで取得するかによって様々なメソッドが実装されます。
+
+
+```ts
+//slides.service.ts
+
+import {Injectable} from '@angular/core';
+import {SLIDES} from './slides.data';
+
+@Injectable()
+export class SlidesService {
+  private _slides = [].concat(SLIDES);
+
+  getAll() {
+    return this._slides;
+  }
+
+}
+```
+
+@Outputなどで設定された関数のイベントを管理するクラスをevent busなどと呼びます。event busではコンポーネント間のコールバックをどのように制御するかを設定します。以下の例では,新たに子コンポーネントが開かれた場合のイベント処理をnotifyOpenで定義し,子コンポーネント初期化時にonOtherSlideOpenというイベントを設定します。
+
+
+```ts
+//slide-bus.service.ts
+import { Injectable } from '@angular/core';
+import {SlidesService} from './slides.service';
+
+@Injectable()
+export class SlideBusService {
+  private _callbacks = new Map<any, () => any>();
+
+  constructor(private _slides: SlidesService) { }
+
+  onOtherSlideOpen(previewComponent: any, cb: () => any) {
+    this._callbacks.set(previewComponent, cb);
+  }
+
+  notifyOpen(previewComponent: any) {
+    Promise.resolve().then(() => {
+      this._callbacks.forEach((cb, cmp) => {
+        if (previewComponent !== cmp) {
+          cb();
+        }
+      });
+    });
+  }
+}
+
+```
+
+template配下は任意のHTMLを配置して表示することができます。形式上titleキーを設定していますが、今回のアプリケーションでは使用していません。
+
+
+```
+import page1 from './slide/template/1.html';
+import page2 from './slide/template/2.html';
+import page3 from './slide/template/3.html';
+
+export const SLIDES = [
+  {
+    title: 'start',
+    page: page1
+  },
+  {
+    title: 'middle',
+    page: page2
+  },
+  {
+    title: 'end',
+    page: page3
+  }
+]
+```
+
+slideの実態となるコンポーネントです。htmlというパラメータを設定することで,任意のDOMをAngularコンポーネントに渡せるようにしています。Angular Animationsに関しては詳細を割愛します。詳しくは,[公式のドキュメント](https://angular.io/guide/animations)を参照してください。
+
+```ts
+//slide.component.ts
+import {HostBinding, Component, Input, Output, EventEmitter} from '@angular/core';
+import {trigger, animate, style, transition, animateChild, query} from '@angular/animations';
+import {SlideBusService} from '../slide-bus.service';
+
+@Component({
+  selector: 'app-slide',
+  templateUrl: './slide.component.html',
+  animations: [
+    trigger('nextAnimation', [
+      transition(':enter', [
+        query('*', [
+          style({ transform: 'translateX(200px)', opacity: 0 }),
+            animate('1200ms cubic-bezier(0.35, 0, 0.25, 1)', style('*'))
+        ])
+      ])
+    ])
+  ]
+})
+
+export class SlideComponent {
+  @Input() html;
+  @Output('close')
+  public closeNotify = new EventEmitter();
+
+  @HostBinding('@nextAnimation') next = false;
+
+  constructor(private _slideService: SlideBusService) {
+    _slideService.onOtherSlideOpen(this, () => this.close());
+  }
+
+  close() {
+    this.closeNotify.next();
+  }
+}
+
+```
+
+以上でスライド関連のコンポーネントの実装は終わりになります。その後app.module.tsなどのmodule管理に,
+
+```
+// app.module.ts等
+import { SlidesComponent } from './slides/slides.component';
+import { SlidesService } from './slides/slides.service';
+import { SlideComponent  } from './slides/slide/slide.component';
+import { SlideBusService } from './slides/slide-bus.service'
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+
+//<中略>
+
+@NgModule({
+  declarations: [
+    ...<中略>
+    SlidesComponent,
+    SlideComponent,
+  ],
+  imports: [
+     ...<中略>
+    BrowserAnimationsModule,
+  ],
+  providers: [SlidesService, SlideBusService, SlidesService],
+})
+```
+
+の設定を追記することで,Routesや
+```
+<app-slides></app-slides>
+```
+で使用することが出来るようになります。
+
+
 
 ### 4.2 Watson Speech to Textを利用する
 #### token取得
