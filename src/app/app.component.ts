@@ -10,14 +10,14 @@ import { Location }                 from '@angular/common';
 
 export class AppComponent {
 
-  constructor(
-    private route: ActivatedRoute,
-    private location: Location
-  ) { }
-  private page = 1;
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.page = params['page'];
-    });
-  }
+  // constructor(
+  //   private route: ActivatedRoute,
+  //   private location: Location
+  // ) { }
+  // private page = 1;
+  // ngOnInit(): void {
+  //   this.route.params.subscribe(params => {
+  //     this.page = params['page'];
+  //   });
+  // }
 }
