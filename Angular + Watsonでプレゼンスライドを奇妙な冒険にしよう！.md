@@ -95,39 +95,104 @@ http://qiita.com/ovrmrw/items/a0b29d6959333c5a746c
 
 ### ブラウザからWatson Speech to Textを利用する
 
+Watson Speech to Textを利用するための `SpeechTextComponent`を作成します。
+
+```
+$ ng g component speech-text
+```
+
+テンプレートにイベント発火用のボタンを作成します。
+
+```speech-text.component.html
+<button (click)="handleMicClick()">mic start</button>
+```
+
+まずtokenを取得しましょう。
+
+```Angular
+getTokenAsync() {
+  return fetch('http://0.0.0.0:3000/api/token')
+          .then(res => res.json() as any)
+          .then(data => data.token)
+}
+```
+
+awaitでtokenを取得しそのtokenを利用しWatson Speech to Textを利用します。
+
+```speech-text.component.ts
+async handleMicClick() {
+  await this.getTokenAsync()
+    .then(token => {
+      this.startRecognizeStream(token)
+    })
+}
+```
+
+書き出しの処理を書きます。
+`keywords`に特に抽出したい文言をセットしておくと正確に取得できます。今回については「徐々に」と「倍速」をセットしています。
+また、コメントアウトしてありますが、`outputElement`に任意のidを指定することで書き出された文字列をテンプレートへ渡すことが出来ます。
+
+```speech-text.component.ts
+startRecognizeStream(token) {
+  const stream = recognizeMicrophone({
+    token,
+    model: 'ja-JP_BroadbandModel',
+    objectMode: true,
+    extractResults: true,
+    keywords: ['徐々に','倍速'],
+    keywords_threshold: 0.7,
+//    outputElement: '#output'
+  })
+  stream.on('data', data => {
+    if (data.final) {
+      const transcript = data.alternatives[0].transcript
+    }
+  })
+  this.recognizeStream = stream
+}
+```
 
 
+### 4.3 受け取ったデータを元にエフェクトをつける
 
-## 概要
-Angular + Watsonでプレゼンスライドを奇妙な冒険にしよう！
+Watson Speech to Textから返ってきた文字列を元にスライドにエフェクトを付けていきましょう。
+`transcript`に入る文字列は話し方によりますが1単語~数十文字までの文字数となります。
 
-* ターゲット
-  * Angularを試してみたいエンジニア
-* 使う技術
-  * Angular
-  * Speech to Text
-  * Node.js
+```
+      this.checkEffectedWord(transcript);
 
-## アウトライン
+```
 
-1	導入
-1.1	Angularを導入するための一歩目としてプレゼンスライドを作る
-1.2	発表中は言葉を発するためそれを活かした差別化をする→Speech to Text
-1.3	完成イメージを見せる
-2	~~構成や使う技術の紹介~~
-2.1	Angularの紹介
-2.2	~~Speech to Textの紹介~~
-3	~~Speech to Textのお試し(Curl)~~
-3.1	~~アカウント作成の流れ ※ 第一弾のため、公式の紹介程度~~
-3.2	~~精度を紹介するためにフリー音声+Curlで試す~~
-4	実際に作る
-4.1	Angularの公式チュートリアルからプレゼンスライドを作るための手順を示す
-4.2	watson-developer-cloud/speech-to-text-nodejs を抜粋しAngularから音声をSpeech to Textへと送る手順を示す
-4.3	受け取ったテキストデータより特定の画像で効果をつける
-5	完成
-5.1	結果をスクリーンショットで表示
-6	終わりに
-6.1	LTや勉強会で他の人に差をつけよう
-6.2	その他日本語対応されれば出来ることなど未来を紹介
+雑にclassつけます。
 
+```speech-text.component.ts
+private keywords = [
+  {keyword: '徐々に', class: 'jojoni'},
+  {keyword: '倍速', class: 'baisoku'},
+];
+checkEffectedWord(word) {
+  let elm = document.getElementById('slide');
+  body.className='effect-layer';
+  this.keywords.forEach(obj => {
+    if (word.match(obj.keyword)) {
+      elm.classList.add(obj.class);
+    }
+  })
+}
+```
+
+## 5 動作確認
+
+画像で確認
+これを
+こうして
+こうなる
+のようなデモを書きます。
+
+## 6 終わりに
+
+LTや勉強会で発表することはあるとおもいます。様々なクールなスライドが世の中に出てきていますが、音声に反応するを作り他の登壇者に差をつけましょう！この夏休みはクールビューティー！！
+
+またエフェクトを付けるだけでなくリアルタイムで字幕をつけたり、
+Language Translatorを利用して和英/英和の翻訳を施した字幕をつけたりとよりプレゼンとしての機能を拡張することが出来ます。ぜひお試しください。
 
