@@ -46,9 +46,7 @@ export class SpeechTextComponent implements OnInit {
     stream.on('data', data => {
       if (data.final) {
         const transcript = data.alternatives[0].transcript
- //       this.speech_text = transcript;
         this.checkEffectedWord(transcript);
-        this.detector.detectChanges();
       }
     })
     this.recognizeStream = stream
