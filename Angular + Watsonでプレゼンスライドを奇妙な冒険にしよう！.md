@@ -204,7 +204,6 @@ slide.serviceは,slideのデータを取得するためのクラスです。今�
 
 ```ts
 //slides.service.ts
-
 import {Injectable} from '@angular/core';
 import {SLIDES} from './slides.data';
 
@@ -250,10 +249,12 @@ export class SlideBusService {
 
 ```
 
-template配下は任意のHTMLを配置して表示することができます。形式上titleキーを設定していますが,今回のアプリケーションでは使用していません。
+
+slides.data.tsは今回用意したスライドのデータを保存しています。DBなどからデータを直接受け取る場合は用意する必要はありません。形式上titleキーを設定していますが,今回のアプリケーションでは使用していません。以下のように設定することで,任意のパスからHTMLを読み込むことができます。今回はtemplate配下には任意のHTMLを配置しています。
 
 
-```
+```ts
+// slides.data.ts
 import page1 from './slide/template/1.html';
 import page2 from './slide/template/2.html';
 import page3 from './slide/template/3.html';
