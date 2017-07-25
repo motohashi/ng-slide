@@ -23,7 +23,8 @@ Watson Speech to Textは文法や日本語に標準対応した音声の文字�
 
 ## 3 Watson Speech to Textを試す
 ### 3.1 Watson Speech to Textを利用する準備
-アプリケーションに組み込む前に、音声の文字起こしのテストをしてみます。公式ドキュメントでは `明瞭な話し方の録音された音声`を要求しているため、今回のテストではアナウンサーの音声ファイル(利用フリーの)を用意しました。
+アプリケーションに組み込む前に、音声の文字起こしのテストをしてみます。「音声　フリー素材 wav」などで検索すれば、利用フリーの音声ファイルがみつかると思うので、用意してください。公式ドキュメントでは `明瞭な話し方の録音された音声` を要求しているため、本記事ではアナウンサーの音声ファイルでテストしました。
+
 
 まずサービス用の認証情報を作成します。 [Blumixコンソール](https://console.bluemix.net)の左上メニューよりWatsonサービスを選択します。
 
@@ -32,7 +33,7 @@ Watson Speech to Textは文法や日本語に標準対応した音声の文字�
 
 Watsonサービスの作成を押下後のリストよりSpeech To Textを選択します。
 
-ここで適当な名前をつけます。
+ここでアプリ名は`sample-stt-application`など判別できる名前をつけてください。
 
 サービス資格情報から先ほど作成した資格情報のアクション[資格情報の表示]を選択し `username`と `password`を残しておきます。
 
@@ -353,8 +354,6 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 ### 4.2 Watson Speech to Textを利用する
 #### token取得
-http://qiita.com/ovrmrw/items/a0b29d6959333c5a746c
-
 [公式サンプル](https://github.com/watson-developer-cloud/speech-to-text-nodejs)よりtoken取得部分を利用しましょう。
 `app.js`で `/api/token`というエンドポイントを提供しています。README通りに`.env`に3項で取得した`username``password`を設定すれば完了です。
 
@@ -433,7 +432,7 @@ Watson Speech to Textから返ってきた文字列を元にスライドにエ�
 
 ```
 
-雑にclassつけます。
+画像を表示するためのclassをセットします。CSSを自由に編集してフェードやいろいろなアニメーションを試してみましょう。
 
 ```speech-text.component.ts
 private keywords = [
@@ -453,11 +452,17 @@ checkEffectedWord(word) {
 
 ## 5 動作確認
 
-画像で確認
-これを
-こうして
-こうなる
-のようなデモを書きます。
+画面で確認してみましょう。
+
+![ezgif-2-9bf14ca8ac.gif](https://qiita-image-store.s3.amazonaws.com/0/21849/07f6e0f2-58aa-3faf-f801-eaf37f22a356.gif "ezgif-2-9bf14ca8ac.gif")
+
+
+
+移動は左右キーで行います。
+3枚目のスライド表示中にで「徐々に」というキーワードを発声します。
+
+すると徐々に奇妙な世界が開けました。
+画像やキーワードを変えてオリジナルのスライドを作ってみましょう。
 
 ## 6 終わりに
 

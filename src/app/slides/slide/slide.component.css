@@ -9,9 +9,10 @@
 
 div.page {
   text-align: center;
+  font-size: 24px;  
 }
-div.page div {
-  text-align: center;  
+div.page p  {
+  text-align: left;
 }
 
 app-image {
