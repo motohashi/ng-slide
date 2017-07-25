@@ -183,19 +183,14 @@ checkEffectedWord(word) {
 
 画面で確認してみましょう。
 
-![Screen Shot 2017-07-25 at 21.03.52.png](https://qiita-image-store.s3.amazonaws.com/0/21849/422600aa-c2ea-cf8d-e7a6-6d750543a9a9.png "Screen Shot 2017-07-25 at 21.03.52.png")
+![ezgif-2-9bf14ca8ac.gif](https://qiita-image-store.s3.amazonaws.com/0/21849/07f6e0f2-58aa-3faf-f801-eaf37f22a356.gif "ezgif-2-9bf14ca8ac.gif")
 
-左右キーで移動します。
 
-![Screen Shot 2017-07-25 at 21.04.00.png](https://qiita-image-store.s3.amazonaws.com/0/21849/7b029616-d87d-9bce-ca34-11a5a4d28b24.png "Screen Shot 2017-07-25 at 21.04.00.png")
 
-![Screen Shot 2017-07-25 at 21.04.12.png](https://qiita-image-store.s3.amazonaws.com/0/21849/e5aa6e58-47d9-6495-9222-6ce3cbaa513a.png "Screen Shot 2017-07-25 at 21.04.12.png")
+移動は左右キーで行います。
+3枚目のスライド表示中にで「徐々に」というキーワードを発生します。
 
-このページで「徐々に」というワードを取り込ませます。すると、、
-
-![Screen Shot 2017-07-25 at 21.06.19.png](https://qiita-image-store.s3.amazonaws.com/0/21849/2b7b3b8b-5ad3-fea7-812f-4730dd2a753f.png "Screen Shot 2017-07-25 at 21.06.19.png")
-
-徐々に奇妙な世界が開けました。
+すると徐々に奇妙な世界が開けました。
 画像やキーワードを変えてオリジナルのスライドを作ってみましょう。
 
 ## 6 終わりに
