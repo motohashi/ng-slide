@@ -83,7 +83,7 @@ $ curl -X POST -u <service_username>:<service_password> \
 
 Slideを作成するためにhtmlファイルを文字列型でimportが出来るように設定します。
 angular-cliのデフォルトの設定ではhtmlをlaw-loaderで読み込むようになっていますが
-そのimport先の型が定まっていないため,importすることができません。そのため下記のような指定が必要となります。
+そのimport先の型が定まっていないため,importすることができません。そのため`src/typings.d.ts` に下記のような指定が必要となります。
 
 ```
 declare module "*.html" {
