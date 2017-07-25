@@ -23,7 +23,7 @@ Watson Speech to Textは文法や日本語に標準対応した音声の文字�
 
 ## 3 Watson Speech to Textを試す
 ### 3.1 Watson Speech to Textを利用する準備
-アプリケーションに組み込む前に、音声の文字起こしのテストをしてみます。「音声　フリー素材 wav」などで検索すれば、利用フリーの音声ファイルがみつかると思うので、用意してください。公式ドキュメントでは `明瞭な話し方の録音された音声` を要求しているため、本記事ではアナウンサーの音声ファイルでテストしました。
+アプリケーションに組み込む前に,音声の文字起こしのテストをしてみます。「音声　フリー素材 wav」などで検索すれば,利用フリーの音声ファイルがみつかると思うので,用意してください。公式ドキュメントでは `明瞭な話し方の録音された音声` を要求しているため,本記事ではアナウンサーの音声ファイルでテストしました。
 
 
 まずサービス用の認証情報を作成します。 [Blumixコンソール](https://console.bluemix.net)の左上メニューよりWatsonサービスを選択します。
@@ -49,7 +49,7 @@ Watsonサービスの作成を押下後のリストよりSpeech To Textを選択
 [APIドキュメント](https://www.ibm.com/watson/developercloud/speech-to-text/api/v1/?curl#get_model)を参照し試してみましょう。
 
 今回利用する音声ファイルはwav形式のためheaderには `Content-Type: audio/wav`を指定します。
-また、日本語の音声ファイルのため `ja-JP_BroadbandModel`を指定します。
+また,日本語の音声ファイルのため `ja-JP_BroadbandModel`を指定します。
 実行するコマンドは以下のようになります。
 
 ```
@@ -59,7 +59,7 @@ $ curl -X POST -u <service_username>:<service_password> \
 "https://stream.watsonplatform.net/speech-to-text/api/v1/models/ja-JP_BroadbandModel/recognize"
 ```
 
-認証情報などのあとに以下のようなjsonレスポンスが表示されます。クリアな音声ファイルが用意できた場合、このように形態素解析済みの文言が高精度に取得できます。
+認証情報などのあとに以下のようなjsonレスポンスが表示されます。クリアな音声ファイルが用意できた場合,このように形態素解析済みの文言が高精度に取得できます。
 
 ```json
 {
@@ -118,7 +118,7 @@ src/app/slides
 
 ```
 
-angular-cli を使用することで、
+angular-cli を使用することで,
 `ng g component slides`を実行した後`ng g component slides/slide`を実行することで,
 直接作成する手間を省くことができます。
 
@@ -193,7 +193,7 @@ export class SlidesComponent implements OnInit {
 
 ```
 
-slides.componentのcurrentIndexというパラメータで現在何ページ目のスライドなのかを管理します。ここで子コンポーネントapp-slideのに対して[html]要素を@Inputに受け渡しています。(*ngIf)によってcurrentIndexとslideに割り当てられた番号が一致した時にslideを表示するようになります。closeは新規に開かれたコンポーネント以外のcomponentに対してコールバックを設定しています。今回はスライドの管理はcurrentIndexの値のみで実現できているので、設定する必要はありませんが,このように親のコンポーネントから必要な関数を@Outputに渡すことで子コンポーネント側で任意のコールバックを設定することができます。
+slides.componentのcurrentIndexというパラメータで現在何ページ目のスライドなのかを管理します。ここで子コンポーネントapp-slideのに対して[html]要素を@Inputに受け渡しています。(*ngIf)によってcurrentIndexとslideに割り当てられた番号が一致した時にslideを表示するようになります。closeは新規に開かれたコンポーネント以外のcomponentに対してコールバックを設定しています。今回はスライドの管理はcurrentIndexの値のみで実現できているので,設定する必要はありませんが,このように親のコンポーネントから必要な関数を@Outputに渡すことで子コンポーネント側で任意のコールバックを設定することができます。
 
 ```html
 //slides.component.html
@@ -253,7 +253,7 @@ export class SlideBusService {
 
 ```
 
-template配下は任意のHTMLを配置して表示することができます。形式上titleキーを設定していますが、今回のアプリケーションでは使用していません。
+template配下は任意のHTMLを配置して表示することができます。形式上titleキーを設定していますが,今回のアプリケーションでは使用していません。
 
 
 ```
@@ -399,7 +399,7 @@ async handleMicClick() {
 
 書き出しの処理を書きます。
 `keywords`に特に抽出したい文言をセットしておくと正確に取得できます。今回については「徐々に」と「倍速」をセットしています。
-また、コメントアウトしてありますが、`outputElement`に任意のidを指定することで書き出された文字列をテンプレートへ渡すことが出来ます。
+また,コメントアウトしてありますが,`outputElement`に任意のidを指定することで書き出された文字列をテンプレートへ渡すことが出来ます。
 
 ```speech-text.component.ts
 startRecognizeStream(token) {
@@ -466,8 +466,8 @@ checkEffectedWord(word) {
 
 ## 6 終わりに
 
-LTや勉強会で発表することはあるとおもいます。様々なクールなスライドが世の中に出てきていますが、音声に反応するを作り他の登壇者に差をつけましょう！この夏休みはクールビューティー！！
+LTや勉強会で発表することはあるとおもいます。様々なクールなスライドが世の中に出てきていますが,音声に反応するを作り他の登壇者に差をつけましょう！この夏休みはクールビューティー！！
 
-またエフェクトを付けるだけでなくリアルタイムで字幕をつけたり、
+またエフェクトを付けるだけでなくリアルタイムで字幕をつけたり,
 Language Translatorを利用して和英/英和の翻訳を施した字幕をつけたりとよりプレゼンとしての機能を拡張することが出来ます。ぜひお試しください。
 
