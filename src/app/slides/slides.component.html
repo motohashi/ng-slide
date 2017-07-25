@@ -1,7 +1,19 @@
-<div *ngIf="slide">
-<p>{{slide.id}}</p>
-<p>{{slide.title}}</p>
-<div>{{slide.body}}</div>
-サニタイズ外すの後でやる。めんどくさい
-</div>
-joijoijoijoijoijoi
+<!--<div *ngFor="let image of activeSlides" class="image-container" @image>
+  <div class="image-info">
+    <h2>Title</h2>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec efficitur ipsum eget tempus vulputate.
+    </p>
+    <p>
+      Proin sed odio aliquam, commodo purus ut, auctor mauris. Mauris ut urna et tellus ullamcorper
+    </p>
+  </div>
+  <div class="image-preview">
+    <app-image [image]="image"></app-image>
+  </div>
+</div>-->
+
+<!-- <div slide-host *ngIf="selectedSlide" (close)="selectSlide(null)" [slide]="selectedSlide"></div> -->
+<ng-container *ngFor="let slide of slides;let i = index;">
+  <app-slide @sliding [html]="slide.page" *ngIf="currentIndex==i" (close)="selectSlide(null)" [slide]="slide"></app-slide>
+</ng-container>
