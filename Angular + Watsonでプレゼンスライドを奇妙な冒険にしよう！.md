@@ -83,7 +83,7 @@ $ curl -X POST -u <service_username>:<service_password> \
 
 Slideを作成するためにhtmlファイルを文字列型でimportが出来るように設定します。
 angular-cliのデフォルトの設定ではhtmlをlaw-loaderで読み込むようになっていますが
-そのimport先の型が定まっていないため,importすることができません。
+そのimport先の型が定まっていないため,importすることができません。そのため下記のような指定が必要となります。
 
 ```
 declare module "*.html" {
@@ -190,7 +190,7 @@ export class SlidesComponent implements OnInit {
 
 ```
 
-slides.componentのcurrentIndexというパラメータで現在何ページ目のスライドなのかを管理します。ここで子コンポーネントapp-slideのに対して[html]要素を@Inputに受け渡しています。(*ngIf)によってcurrentIndexとslideに割り当てられた番号が一致した時にslideを表示するようになります。closeは新規に開かれたコンポーネント以外のcomponentに対してコールバックを設定しています。今回はスライドの管理はcurrentIndexの値のみで実現できているので,設定する必要はありませんが,このように親のコンポーネントから必要な関数を@Outputに渡すことで子コンポーネント側で任意のコールバックを設定することができます。
+slides.componentのcurrentIndexというパラメータで現在何ページ目のスライドなのかを管理します。ここで子コンポーネントapp-slideに対して[html]要素を@Inputに受け渡しています。(*ngIf)によってcurrentIndexとslideに割り当てられた番号が一致した時にslideを表示するようになります。closeは新規に開かれたコンポーネント以外のcomponentに対してコールバックを設定しています。今回はスライドの管理はcurrentIndexの値のみで実現できているので設定する必要はありませんが,このように親のコンポーネントから必要な関数を@Outputに渡すことで子コンポーネント側で任意のコールバックを設定することができます。
 
 ```html
 //slides.component.html
