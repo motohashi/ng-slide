@@ -63,7 +63,6 @@ export class SpeechTextComponent implements OnInit {
 
     private keywords = [
       {keyword: '徐々に', class: 'jojoni'},
-      {keyword: 'ええ', class: 'jojoni'},
       {keyword: '海賊', class: 'kaizoku'},
     ];
     checkEffectedWord(word) {
