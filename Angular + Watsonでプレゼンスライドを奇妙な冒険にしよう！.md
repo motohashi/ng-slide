@@ -9,9 +9,16 @@ IBM BluemixのSpeech To Textを利用し単調になりがちなスライドに�
 ## 2. 利用技術の紹介
 今回のアプリケーションでは以下の技術を利用します。
 
-- web/フロント: Angular Cli
+- Web/フロント: Angular Cli
 - 認証サーバー: typescript + node.js
 - 音声認識: Watson Speech to Text
+
+### 2.1 構成
+![Screen Shot 2017-08-01 at 17.50.24.png](https://qiita-image-store.s3.amazonaws.com/0/21849/cd513d59-4e15-a995-6114-f88cbaf03099.png "Screen Shot 2017-08-01 at 17.50.24.png")
+
+上記のような構成で実現します。
+ローカル環境にWeb/フロントを担うサーバー、認証用にtoken取得するサーバーを構築します。
+
 
 ### 2.2 Watson Speech to Text
 Watson Speech to Textは文法や日本語に標準対応した音声の文字書き起こしサービスです。音をそのまま書き起こすのではなく文法や辞書を加味し書き起こすため正確な書き起こしが実現できます。
@@ -116,8 +123,8 @@ src/app/slides
 ```
 
 angular-cli を使用することで,
-`ng g component slides`を実行した後`ng g component slides/slide`を実行することで,
-直接作成する手間を省くことができます。
+`ng g component slides`を実行した後`ng g component slides/slide`と実行し,
+直接作成する手間を省きます。
 
 
 #### 各ファイルの実装
@@ -352,8 +359,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 ### 4.2 Watson Speech to Textを利用する
 #### token取得
-[公式サンプル](https://github.com/watson-developer-cloud/speech-to-text-nodejs)よりtoken取得部分を利用しましょう。
-`app.js`で `/api/token`というエンドポイントを提供しています。README通りに`.env`に3項で取得した`username``password`を設定すれば完了です。
+[こちら](https://github.com/motohashi/cognitive-server-starter)よりtoken取得部分を利用しましょう。
+`server.ts`で `/api/token`というエンドポイントを提供しています。README通りに`secret/watson-speech-to-text.json`に3項で取得した`url``username``password`を設定すれば完了です。
 
 ブラウザからアクセスすると以下のようにtokenが取得出来ることが確認できます。
 
@@ -368,15 +375,28 @@ Watson Speech to Textを利用するための `SpeechTextComponent`を作成し�
 $ ng g component speech-text
 ```
 
+ファイル構成は以下のようになります。
+
+```
+speech-text
+├── speech-text.component.css
+├── speech-text.component.html
+├── speech-text.component.spec.ts
+├── speech-text.component.ts
+└── speech-text.module.ts
+```
+
 テンプレートにイベント発火用のボタンを作成します。
 
-```speech-text.component.html
+```html
+//speech-text.component.html
 <button (click)="handleMicClick()">mic start</button>
 ```
 
 まずtokenを取得しましょう。
 
-```Angular
+```ts
+// speech-text.component.ts
 getTokenAsync() {
   return fetch('http://0.0.0.0:3000/api/token')
           .then(res => res.json() as any)
@@ -386,7 +406,8 @@ getTokenAsync() {
 
 awaitでtokenを取得しそのtokenを利用しWatson Speech to Textを利用します。
 
-```speech-text.component.ts
+```ts
+speech-text.component.ts
 async handleMicClick() {
   await this.getTokenAsync()
     .then(token => {
@@ -399,7 +420,8 @@ async handleMicClick() {
 `keywords`に特に抽出したい文言をセットしておくと正確に取得できます。今回については「徐々に」と「倍速」をセットしています。
 また,コメントアウトしてありますが,`outputElement`に任意のidを指定することで書き出された文字列をテンプレートへ渡すことが出来ます。
 
-```speech-text.component.ts
+```ts
+// speech-text.component.ts
 startRecognizeStream(token) {
   const stream = recognizeMicrophone({
     token,
@@ -424,15 +446,20 @@ startRecognizeStream(token) {
 
 Watson Speech to Textから返ってきた文字列を元にスライドにエフェクトを付けていきましょう。
 `transcript`に入る文字列は話し方によりますが1単語~数十文字までの文字数となります。
+`transcript`からエフェクトを作る関数を作成します。
 
-```
-      this.checkEffectedWord(transcript);
-
+```ts
+// speech-text.component.ts
+      if (data.final) {
+        const transcript = data.alternatives[0].transcript
+        this.checkEffectedWord(transcript);
+      }
 ```
 
 画像を表示するためのclassをセットします。CSSを自由に編集してフェードやいろいろなアニメーションを試してみましょう。
 
-```speech-text.component.ts
+```ts
+// speech-text.component.ts
 private keywords = [
   {keyword: '徐々に', class: 'jojoni'},
   {keyword: '倍速', class: 'baisoku'},

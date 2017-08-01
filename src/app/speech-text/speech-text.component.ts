@@ -16,7 +16,7 @@ export class SpeechTextComponent implements OnInit {
   ngOnInit() {}
 
   getTokenAsync() {
-    return fetch('http://0.0.0.0:4000/speech-to-text/token')
+    return fetch('http://0.0.0.0:3000/api/token')
             .then(res => res.json() as any)
             .then(data => data.token)
   }
