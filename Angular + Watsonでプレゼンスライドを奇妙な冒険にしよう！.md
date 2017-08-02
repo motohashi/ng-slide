@@ -82,7 +82,7 @@ $ curl -X POST -u <service_username>:<service_password> \
 
 ## 4 実装
 
-それでは実際にスライドを作成してみましょう。
+それでは実際にスライドを作成してみましょう。完成物は[こちら](https://github.com/motohashi/ng-slide)になります。
 
 ### 4.1 Angularでスライドを作成する
 
