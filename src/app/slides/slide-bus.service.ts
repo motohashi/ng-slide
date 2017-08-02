@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {SlidesService} from './slides.service';
+import { SlidesService } from './slides.service';
 
 @Injectable()
 export class SlideBusService {

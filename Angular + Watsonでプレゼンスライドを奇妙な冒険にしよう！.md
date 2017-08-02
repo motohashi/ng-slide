@@ -30,7 +30,7 @@ Watson Speech to Textは文法や日本語に標準対応した音声の文字�
 アプリケーションに組み込む前に,音声の文字起こしのテストをしてみます。「音声　フリー素材 wav」などで検索すれば,利用フリーの音声ファイルがみつかると思うので,用意してください。公式ドキュメントでは `明瞭な話し方の録音された音声` を要求しているため,本記事ではアナウンサーの音声ファイルでテストしました。
 
 
-まずサービス用の認証情報を作成します。 [Blumixコンソール](https://console.bluemix.net)の左上メニューよりWatsonサービスを選択します。
+まずサービス用の認証情報を作成します。 [Bluemixコンソール](https://console.bluemix.net)の左上メニューよりWatsonサービスを選択します。
 
 ![Screen_Shot_2017-07-24_at_11_59_00.png](https://qiita-image-store.s3.amazonaws.com/0/21849/11febf51-35eb-ad8c-6821-f1a56d6aa2c3.png "Screen_Shot_2017-07-24_at_11_59_00.png")
 
@@ -134,7 +134,7 @@ angular-cli を使用することで,
 slides.component.tsはスライド全体を管理するコンポーネントです。@HostListenerによってこのコンポーネントにおけるイベントをフックすることができます。ここでは,LeftキーとRightキーにイベントをフックできるようにしています。
 
 ```ts
-// slides.component.ts
+//slides.component.ts
 import {
   HostListener,
   Component,
@@ -261,7 +261,7 @@ slides.data.tsは今回用意したスライドのデータを保存していま
 
 
 ```ts
-// slides.data.ts
+//slides.data.ts
 import page1 from './slide/template/1.html';
 import page2 from './slide/template/2.html';
 import page3 from './slide/template/3.html';
@@ -325,8 +325,9 @@ export class SlideComponent {
 
 以上でスライド関連のコンポーネントの実装は終わりになります。その後app.module.tsなどのmodule管理に,
 
-```
-// app.module.ts等
+```ts
+//app.module.ts等
+
 import { SlidesComponent } from './slides/slides.component';
 import { SlidesService } from './slides/slides.service';
 import { SlideComponent  } from './slides/slide/slide.component';
@@ -396,7 +397,7 @@ speech-text
 まずtokenを取得しましょう。
 
 ```ts
-// speech-text.component.ts
+//speech-text.component.ts
 getTokenAsync() {
   return fetch('http://0.0.0.0:3000/api/token')
           .then(res => res.json() as any)
@@ -407,7 +408,7 @@ getTokenAsync() {
 awaitでtokenを取得しそのtokenを利用しWatson Speech to Textを利用します。
 
 ```ts
-speech-text.component.ts
+//speech-text.component.ts
 async handleMicClick() {
   await this.getTokenAsync()
     .then(token => {
@@ -421,7 +422,7 @@ async handleMicClick() {
 また,コメントアウトしてありますが,`outputElement`に任意のidを指定することで書き出された文字列をテンプレートへ渡すことが出来ます。
 
 ```ts
-// speech-text.component.ts
+//speech-text.component.ts
 startRecognizeStream(token) {
   const stream = recognizeMicrophone({
     token,
@@ -449,7 +450,7 @@ Watson Speech to Textから返ってきた文字列を元にスライドにエ�
 `transcript`からエフェクトを作る関数を作成します。
 
 ```ts
-// speech-text.component.ts
+//speech-text.component.ts
       if (data.final) {
         const transcript = data.alternatives[0].transcript
         this.checkEffectedWord(transcript);
@@ -459,7 +460,7 @@ Watson Speech to Textから返ってきた文字列を元にスライドにエ�
 画像を表示するためのclassをセットします。CSSを自由に編集してフェードやいろいろなアニメーションを試してみましょう。
 
 ```ts
-// speech-text.component.ts
+//speech-text.component.ts
 private keywords = [
   {keyword: '徐々に', class: 'jojoni'},
   {keyword: '倍速', class: 'baisoku'},
