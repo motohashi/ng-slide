@@ -91,9 +91,159 @@ $ curl -X POST -u <service_username>:<service_password> \
 
 ## 4 実装
 
-それでは実際にスライドを作成してみましょう。完成物は[こちら](https://github.com/motohashi/ng-slide)になります。
+### 4.1 Angularプロジェクトの概要
 
-### 4.1 Angularでスライドを作成する
+#### Angularプロジェクトを作成する
+
+Angularのプロジェクトはangular-cliを使用することで簡単に作成することができます。本サンプルコードは以下の動作環境を用いて作成しています。
+
+  |ツール|バージョン|備考|
+  |--|--|--|
+  |node|v7.8.0||
+  |npm|v4.2.0||
+  |angular-cli|v1.2.0|サンプルコードをcloneした場合はインストール不要|
+
+その他使用しているライブラリの情報はpackage.json、package-lock.jsonに記載しています。また、[angular-cli](https://github.com/angular/angular-cli)を使用しています。新規のプロジェクトから作成を始める場合は、所定のバージョンのangular-cliを`npm install -g @angular/cli`でグローバルインストールし、ターミナルなどのコンソールで以下のコマンドを入力します。
+
+```shell
+ng new ${project}
+```
+
+上の${project}に任意のプロジェクト名を入れるとプロジェクト名のディレクトリが作成され、配下にプロジェクトのひな型が作成されます。この状態で、プロジェクト配下に移動し、ng serveあるいは、npm startを実行すると、angular-cli内部で設定されているwebpack-devserverが起動し、ひな型のWEBアプリケーションが起動します。webpackの設定は通常angular-cliのnode_modulesの中に隠蔽されているため、ngコマンドを使っている限り設定を変更することができませんが、webpackの設定を柔軟に行いたい場合などにおいて、
+
+```shell
+ng eject
+```
+
+コマンドを使用してangular-cliのwebpackのデフォルト設定が施されているwebpack.config.jsonとpackage.jsonを生成することもできます。
+
+#### Angularプロジェクトの基本構成
+
+angular-cliを利用する場合、.angular-cli.jsonにbuildの設定が書き出されています。ここで、重要なのは、以下の設定です。
+
+```json
+      "index": "index.html",
+      "main": "main.ts",
+```
+
+この設定は、main.tsの設定に従いテンプレートとしてのindex.htmlの中に設定されている後述のAngularのコンポーネントをコンパイルしていき、最終的にDOMレンダリングされたindex.htmlを生成する設定になります。この設定は、実は、index.html上にAngularを含む最終的にビルドされてバンドルされたjsをscriptタグで発火させているに過ぎませんが、より発展した設定を行うことで、WEBサーバーのレスポンスとしてサーバサイドレンダリングされたhtmlを返すことが出来たり、コンポーネントのlazy loadができるようにすることで、ユーザーエクスペリエンスを向上させることができます。main.tsは以下のようなコードが記述されています。
+
+```typescript
+//main.ts
+platformBrowserDynamic().bootstrapModule(AppModule);
+```
+
+AppModuleは、Angularのモジュールです。Angularのモジュールは後述するように定義されているコンポーネントやその中で使われているモジュールや設定をindex.htmlや他のモジュール内で使用できるように定義する、いわば設定ファイルのような役割をします。
+
+#### Angularのモジュールの構成
+
+```typescript
+//app.module.ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { HttpModule } from '@angular/http';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Routes } from '@angular/router';
+import { AppComponent } from './app.component';
+import { SlidesComponent } from './slides/slides.component';
+import { SpeechTextComponent } from './speech-text/speech-text.component';
+import { SlidesService } from './slides/slides.service';
+import { SlideComponent  } from './slides/slide/slide.component';
+import { SlideBusService } from './slides/slide-bus.service'
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+const appRoutes: Routes = [
+  { path: 'slides', component: SlidesComponent },
+  { path: '',      component: AppComponent },
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    SlidesComponent,
+    SlideComponent,
+    SpeechTextComponent,
+  ],
+  imports: [
+    CommonModule,
+    BrowserModule,
+    FormsModule,
+    HttpModule,
+    BrowserAnimationsModule,
+    RouterModule.forRoot(
+      appRoutes,
+      { enableTracing: true } 
+    )
+  ],
+  exports: [ RouterModule ],
+  providers: [SlidesService, SlideBusService, SlidesService],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+以上は本サンプルコードに使用されているapp.module.tsのソースコードになります。この例に沿って説明を行います。まず、@NgModuleはデコレータでAppModuleクラスがAngularのモジュールであることを定義するとともに、設定を渡します。@NgModuleの設定値に関しては、今回よく使われる上記の例のみを説明します。そのほかの設定値に興味がある方は公式のドキュメントをご覧ください。それぞれ指定されているコンポーネントやモジュールやサービスの詳細についてはここでは割愛します。
+
+- declations 
+  
+  前述のmain.tsで呼ばれたhtmlファイル内において、declationsで指定されているそれぞれのコンポーネントに指定されているセレクタの条件に当てはまるタグをコンパイルできるようにします。これはこのモジュール内で指定されているすべてのコンポーネントのテンプレートのタグにも有効になり、コンポーネントのセレクタの条件に当てはまるタグが階層的にコンポーネントに置き換わるようになります。また、Directiveや、Pipeを指定するとそれらをモジュールの中で指定されている全てのコンポーネント内で使用することができるようになります。
+
+- imports
+  
+  外部のAngularモジュールをインポートします。このときimportsに指定したAngularモジュール内でexportsに設定されているModule、Component、Directive、Pipe、providersに指定されているServiceを、importsした側のコンポーネントで有効にします。
+
+- exports
+  
+  外部のAngularモジュールのimportsにモジュールが指定された時に指定されたモジュールがエクスポートする機能を選択します。exportsで指定したModule,Component,Directive,Pipeをimportsした側のコンポーネント側で使用することができるようになります。
+
+- providers
+
+　このモジュール内および、このモジュールをimportしたコンポーネント内で*Data Injection(DI)によって使用可能になるサービスクラスを登録します。サービスはデータの送信・取得などコンポーネントへのデータの渡し方や、コンポーネントのデータと連動するイベントの処理など手続き的な処理を記述するクラスの名称です。これらのサービスは対象のモジュール内で使用可能なすべてのコンポーネントにおいてつけ外しが可能になります。
+
+- bootstrap
+
+  コンポーネントのエントリポイントです。最初にコンパイルを開始するコンポーネントを指定します。この指定により、このモジュールが適用されている範囲が明確になります。複数のAngularアプリケーションを一つのプロジェクトで使用したい場合かつ、お互いの実装が共存できないような場合に、他のbootstrapモジュールへの干渉を防ぐためimportsの代わりに指定が必要なものです。
+
+*Data Injection:内部変数にクラスを持つオブジェクトにおいて、その内部変数にその場でクラスのインスタンスを生成して代入するのではなく、クラスのインスタンスを関数の引数として外部から渡してその値を内部変数に代入させることで、サブクラスやインターフェース経由で継承クラスを引数の型に指定できるようにしたり、処理の手順を確定させることによって、Data Injection先のコードを一切変えずにクラスのつけ外しによる変更を容易にする実装上のテクニック。AngularにおいてはサービスをData Injectionで指定することが規約になっています。
+
+#### Angularのコンポーネントの構成
+
+コンポーネントはそのコンポーネント内で指定されている独自のセレクタ条件にマッチするHTMLのタグを、内部に設定されたHTMLテンプレートに置き換えます。これをレンダリングまたは、Angularの場合はコンパイルと呼びます。さらに、そのテンプレート内の一部分をコンポーネントのデータと連動させることができ、ユーザーの操作や通信によってデータが変更された場合に画面表示やそのほかのデータへの影響を即座に反映させることができます。このように内部データ同士の変更や内部データと画面描画を連動させるように設定することをデータバインディングと呼びます。テンプレートにはこのデータバインディングと画面表示を制御するための様々な記法があります(ここでは割愛します)。また、テンプレート内で更にモジュールに定義済みのコンポーネントのセレクタ条件にマッチするタグを埋め込むことで連鎖的にコンポーネントをコンパイルすることができます。以下は単純なコンポーネントの例です。
+
+```typescript
+import { Component } from '@angular/core';
+
+export class Example {
+  id: number;
+  text: string;
+}
+
+@Component({
+  selector: 'my-app',
+  template: `
+    <h1>{{example.text}}</h1>
+    <div>
+      <label>example data binding: </label>
+      <input [(ngModel)]="example.text" placeholder="input free and change h1"/>
+    </div>
+  `,
+  styles: [`
+    h1 {
+      text-color:red;
+    }
+  `]
+})
+export class AppComponent {
+  example: Example = new Example();
+}
+```
+
+以上の例では、`<my-app></my-app>`というタグをこのコンポーネントで定義されているテンプレートに置き換え、textboxに入力した文字をh1要素の文字列として即座に反映するコンポーネントの例になります。innerTextではマスタッシュ記法と呼ばれる{{}}で囲まれた文字列を、コンポーネント内の変数の参照に対応させることで、inputの入力には[(ngModel)]="example.text"のように[(ngModel)]の右辺をコンポーネント内の変数の参照に対応させることでデータバインディングを行うことができます。ちなみに[(ngModel)]の[]はinputプロパティの指定に使うシンタックスで内部変数が変更されるとtextboxの文字列も変更されるように単方向データバインディングします。この場合、textの入力は内部変数には反映されません。そして、()はoutputプロパティの指定を表し指定されたプロパティの変更に応じて動作する処理を渡します。[(ngModel)]と指定するとプロパティの値の変更とtextboxの値を連動させ、ユーザーの入力を内部変数の変更と連動させることができます（ただし(ngModel)の指定は機能しません。これは、[ngModel]が内部変数のプロパティにsetterを付加するのに対し、(ngModel)単体の場合は未定義のsetterに対して入力値を代入するというような動作をしていると考えられます。stylesはこのコンポーネントの内部だけで有効なスタイルを指定できます。templateやstylesは外部ファイルに置き換えて、パス指定で設定することもできます。
+
+### 4.2 Angularでスライドを作成する
+
+Angularの基本的な構成を踏まえ実際にスライドの表示と切り替え機能を持つコンポーネントを作成してみましょう。完成物は[こちら](https://github.com/motohashi/ng-slide)になります。
 
 #### スライドを作るための準備
 
@@ -366,7 +516,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 
 
-### 4.2 Watson Speech to Textを利用する
+### 4.3 Watson Speech to Textを利用する
 #### token取得
 [こちら](https://github.com/motohashi/cognitive-server-starter)よりtoken取得部分を利用しましょう。
 `server.ts`で `/api/token`というエンドポイントを提供しています。README通りに`secret/watson-speech-to-text.json`に3項で取得した`url``username``password`を設定すれば完了です。
