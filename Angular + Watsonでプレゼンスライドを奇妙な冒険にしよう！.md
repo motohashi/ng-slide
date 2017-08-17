@@ -146,7 +146,6 @@ import {
 import {trigger, animate, style, transition, animateChild, group, query, stagger} from '@angular/animations';
 import {SlideBusService} from './slide-bus.service';
 import {SlidesService} from './slides.service';
-import {SlideDirective} from './slide/slide.directive';
 import {SlideComponent} from './slide/slide.component';
 
 @Component({
