@@ -397,13 +397,14 @@ speech-text
 ```
 
 テンプレートにイベント発火用のボタンを作成します。
+`(click)`はonclickイベントを定義します。
 
 ```html
 //speech-text.component.html
 <button (click)="handleMicClick()">mic start</button>
 ```
 
-まずtokenを取得する関数を用意しましょう。先程作ったtoken取得用のサーバーを利用します。
+まずtokenを取得する関数`getTokenAsync`を用意しましょう。先程作ったtoken取得用のサーバーを利用します。
 
 ```ts
 //speech-text.component.ts
@@ -414,7 +415,7 @@ getTokenAsync() {
 }
 ```
 
-awaitでtokenを取得しそのtokenを利用しWatson Speech to Textを利用します。
+awaitでtokenを含むjsonデータ取得します。そのtokenを利用しWatson Speech to Textをcallします。
 
 ```ts
 //speech-text.component.ts
@@ -426,9 +427,9 @@ async handleMicClick() {
 }
 ```
 
-書き出しの処理を書きます。
+文字起こしデータの書き出しの処理を書きます。
 `keywords`に特に抽出したい文言をセットしておくと正確に取得できます。今回については「徐々に」と「倍速」をセットしています。
-また,コメントアウトしてありますが,`outputElement`に任意のidを指定することで書き出された文字列をテンプレートへ渡すことが出来ます。
+また,コメントアウトしてありますが,`outputElement`に任意のidを指定することで書き出された文字列をテンプレートへ渡すことが出来ます。字幕などリアルタイムの文字起こしが必要な際はこれを利用します。
 
 ```ts
 //speech-text.component.ts
@@ -456,7 +457,7 @@ startRecognizeStream(token) {
 
 Watson Speech to Textから返ってきた文字列を元にスライドにエフェクトを付けていきましょう。
 `transcript`に入る文字列は話し方によりますが1単語~数十文字までの文字数となります。
-`transcript`からエフェクトを作る関数を作成します。
+`transcript`からエフェクトを作る関数を作成します。今回は一番シンプルな手法としてclassをセットしcssで透過画像を表示します。
 
 ```ts
 //speech-text.component.ts
@@ -487,11 +488,9 @@ checkEffectedWord(word) {
 
 ## 5 動作確認
 
-画面で確認してみましょう。
+それではここまで作成したものを画面で確認してみましょう。
 
 ![ezgif-2-9bf14ca8ac.gif](https://qiita-image-store.s3.amazonaws.com/0/21849/07f6e0f2-58aa-3faf-f801-eaf37f22a356.gif "ezgif-2-9bf14ca8ac.gif")
-
-
 
 スライドの移動は左右キーで行います。
 3枚目のスライド表示中にで「徐々に」というキーワードを発声します。
@@ -501,7 +500,7 @@ checkEffectedWord(word) {
 
 ## 6 終わりに
 
-社内社外学内学外問わず勉強会での登壇やLTなどスライドを用い発表することは様々な機会であるとおもいます。無償有償問わずクールなスライドが世の中に出てきていますが,音声に反応するを作り他の登壇者に差をつけましょう！
+社内社外や学内学外問わず勉強会での登壇やLTなどスライドを用い発表することは様々な機会であるとおもいます。無償有償問わずクールなスライドが世の中に出てきていますが,音声に反応するを作り他の登壇者に差をつけましょう！
 
 またWatsonの他のAPIを利用することでエフェクトを付けるだけでなくリアルタイムで字幕をつけたり,
 Language Translatorを利用して和英/英和の翻訳を施した字幕をつけたりと,よりプレゼンとしての機能を拡張することが出来ます。ぜひお試しください。
