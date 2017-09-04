@@ -12,9 +12,6 @@ import { SlideComponent  } from './slides/slide/slide.component';
 import { SlideBusService } from './slides/slide-bus.service'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-
-
-
 const appRoutes: Routes = [
   { path: 'slides', component: SlidesComponent },
   { path: '',      component: AppComponent },
