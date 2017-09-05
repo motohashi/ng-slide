@@ -18,8 +18,7 @@ export class SlideBusService {
           break;
       }
     }
-    if (!data) return;
-
+    if ( !data ) return;
     const slidesComponent = this.slidesByName.get(data.title);
     slidesComponent.selectSlide(data.title);
   }

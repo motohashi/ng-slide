@@ -11,6 +11,7 @@ import { SlidesService } from './slides/slides.service';
 import { SlideComponent  } from './slides/slide/slide.component';
 import { SlideBusService } from './slides/slide-bus.service'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule } from '@angular/common/http';
 
 const appRoutes: Routes = [
   { path: 'slides', component: SlidesComponent },
@@ -29,10 +30,11 @@ const appRoutes: Routes = [
     BrowserModule,
     FormsModule,
     HttpModule,
+    HttpClientModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(
       appRoutes,
-      { enableTracing: true } 
+      { enableTracing: true }
     )
   ],
   exports: [ RouterModule ],

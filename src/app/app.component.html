@@ -1,3 +1,8 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<app-slides></app-slides>
-<app-speech-text></app-speech-text>
+
+<div id="bg" [ngClass]="bgEffect">
+</div>
+<canvas id="canvasOverlay" [ngClass]="canvasEffect"></canvas>
+<div id="slide" class="container">
+  <app-slides></app-slides>
+  <app-speech-text></app-speech-text> 
+</div>

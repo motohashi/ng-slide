@@ -1,15 +1,15 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import { SlideService } from './slide.service';
+import { SlideBusService } from './slide-bus.service';
 
 describe('SlideService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [SlideService]
+      providers: [SlideBusService]
     });
   });
 
-  it('should be created', inject([SlideService], (service: SlideService) => {
+  it('should be created', inject([SlideBusService], (service: SlideBusService) => {
     expect(service).toBeTruthy();
   }));
 });

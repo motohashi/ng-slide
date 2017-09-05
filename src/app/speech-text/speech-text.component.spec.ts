@@ -22,4 +22,9 @@ describe('SpeechTextComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  it('can get token', () => {
+    const test = component.getTokenAsync();
+    expect(test).toBeTruthy();
+  });
 });

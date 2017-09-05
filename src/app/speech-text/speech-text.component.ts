@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import * as recognizeMicrophone  from 'watson-speech/speech-to-text/recognize-microphone';
+import * as recognizeMicrophone from 'watson-speech/speech-to-text/recognize-microphone';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-speech-text',
@@ -10,15 +11,17 @@ export class SpeechTextComponent implements OnInit {
 
   private isRecording = false
   private recognizeStream = null
+  private keywords = [
+    {keyword: '徐々に', class: 'jojoni'},
+    {keyword: '海賊', class: 'kaizoku'},
+  ];
 
-  constructor(private detector:ChangeDetectorRef) { }
+  constructor(private http: HttpClient, private detector: ChangeDetectorRef) { }
 
   ngOnInit() {}
 
   getTokenAsync() {
-    return fetch('http://0.0.0.0:3000/api/token')
-            .then(res => res.json() as any)
-            .then(data => data.token)
+    return this.http.get('/auth');
   }
 
   async handleMicClick() {
@@ -27,8 +30,9 @@ export class SpeechTextComponent implements OnInit {
     } else if (!this.isRecording) {
       this.isRecording = true
       await this.getTokenAsync()
-        .then(token => {
-          this.startRecognizeStream(token)
+        .subscribe(token => {
+          console.log(token)
+          this.startRecognizeStream(token['token']);
         })
     }
   }
@@ -39,11 +43,12 @@ export class SpeechTextComponent implements OnInit {
       model: 'ja-JP_BroadbandModel',
       objectMode: true,
       extractResults: true,
-      keywords: ['徐々に','海賊'],
+      keywords: ['徐々に', '海賊'],
       keywords_threshold: 0.7,
     })
     stream.on('data', data => {
       if (data.final) {
+        console.log(data);
         const transcript = data.alternatives[0].transcript
         this.checkEffectedWord(transcript);
       }
@@ -60,20 +65,13 @@ export class SpeechTextComponent implements OnInit {
     this.recognizeStream = null
   }
 
-
-    private keywords = [
-      {keyword: '徐々に', class: 'jojoni'},
-      {keyword: '海賊', class: 'kaizoku'},
-    ];
-    checkEffectedWord(word) {
-      let body = document.getElementById('slide');
-      body.className='effect-layer';
-                console.log(word)
-      this.keywords.forEach(obj => {
-        if (word.match(obj.keyword)) {
-
-          body.classList.add(obj.class);
-        }
-      })
-    }
+  checkEffectedWord(word) {
+    const body = document.getElementById('slide');
+    body.className = 'effect-layer';
+    this.keywords.forEach(obj => {
+      if (word.match(obj.keyword)) {
+        body.classList.add(obj.class);
+      }
+    })
+  }
 }

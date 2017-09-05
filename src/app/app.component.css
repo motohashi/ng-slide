@@ -1,0 +1,36 @@
+/* body {
+    position: absolute;
+    background: #fff;
+    overflow: hidden;
+} */
+
+#canvasOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #33DA37;
+    width: 100%;
+    height: 100%;
+    mix-blend-mode: hard-light;
+}
+
+#bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* 背景グラデーションの作成 */
+    background: linear-gradient(to bottom,
+    hsla(116, 75%, 48%, 0.76),
+    hsl(240, 80%, 60%),
+    hsl(359, 93%, 48%));
+    background-size: 400% 400%;
+    animation: AnimationName 10s ease infinite;
+}
+
+@keyframes AnimationName {
+    0% { background-position: 50% 0% }
+    50% { background-position: 50% 100%	}
+    100% { background-position: 50% 0% }
+}
