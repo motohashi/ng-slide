@@ -1,19 +1,35 @@
+import { RGB, HSL, Color } from './color';
 
+const QTY = 360;
+const SIZE = 2.0;
+const DECAY = 0.98;
+const GRAVITY = 1.5;
 
- const QTY = 360;  // particles quantity
- const SIZE = 2.0; // particle size
- let DECAY = 0.98; // energy decay
- let GRAVITY = 1.5; // virtual gravity
-
-
-class Circle {
-  ctx;
-  radian = Math.PI * 2;
-  posX;
-  posY;
-  velX;
-  velY;
-  size;
+export class Spark {
+  public static radian = Math.PI * 2;
+  public size = SIZE;
+  static generateSpark(x, y) {
+    const theta   = Math.random() * Spark.radian;
+    const velocity = Math.random() * 5;
+    return new Spark(
+      x,
+      y,
+      Math.cos(theta) * velocity,
+      Math.sin(theta) * velocity,
+      Color.randHsl(100, 90, 60, 50, 90, 70).toString(),
+      velocity,
+      Math.random() > 0.5 ? true : false
+    );
+  }
+  constructor(
+    private posX: number,
+    private posY: number,
+    private velX: number,
+    private velY: number,
+    private col: string,
+    private velocity: number,
+    private sw: boolean
+  ) {}
   addVelocity() {
     this.posX += this.velX;
     this.posY += this.velY;
@@ -29,104 +45,71 @@ class Circle {
     this.posY += g;
     return this;
   }
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.posX, this.posY, this.size, 0, circle.rad, true);
-    if(this.sw) {
-      ctx.fillStyle = "#FFFFFF";
-      this.sw = false;
-    } else {
-      ctx.fillStyle = this.col;
-      this.sw = true;
-    }
-    ctx.fill();
-  }
-};
+  updateNextTick() {
+    this.addVelocity();
+    this.computeDecay(DECAY);
+    this.computeGravity(GRAVITY);
+  };
+}
 
-class FireWork {
-
-  rfws = [];
-
-  cvs;
-  ctx;
+export class FireWorksRenderrer {
+  fws = [];
+  public cvs;
+  public ctx;
   width;
-  hight;
+  height;
   left;
   top;
   fps = 0;
   constructor(cvs) {
     this.cvs = cvs || document.getElementsByTagName('canvas');
     this.ctx = cvs.getContext('2d');
+    this.width = cvs.canvas.width;
+    this.height = cvs.canvas.height;
+    this.left = cvs.canvas.left;
+    this.top = cvs.canvas.top;
   }
-
+  draw(spark) {
+    this.ctx.beginPath();
+    this.ctx.arc(spark.posX, spark.posY, spark.size, 0, spark.radian, true);
+    if ( spark.sw ) {
+      this.ctx.fillStyle = "#FFFFFF";
+      spark.sw = false;
+    } else {
+      this.ctx.fillStyle = spark.col;
+      spark.sw = true;
+    }
+    this.ctx.fill();
+  }
   explode(x, y) {
-    var i, color;
-    const generateSpark = function () {
-        var angle, velocity, spark;
-        angle    = Math.random() * (circle.rad);
-        velocity = Math.random() * 5;
-        return spark = {
-          posX: x,
-          posY: y,
-          velX: Math.cos(angle) * velocity,
-          velY: Math.sin(angle) * velocity,
-          col : color,
-          size: SIZE,
-          sw: Math.random() > 0.5 ? true : false      };
-      };
-      x -= this.left;
-      y -= this.top;
-      color = colorz.randHsl(100, 90, 60, 50, 90, 70).toString();
-    for (i = 0; i < QTY; i += 1) {
-      fws.push(generateSpark());
+    let color;
+    x -= this.left;
+    y -= this.top;
+    color = Color.randHsl(100, 90, 60, 50, 90, 70).toString();
+    for (let i = 0; i < QTY; i += 1) {
+      this.fws.push(Spark.generateSpark(x, y));
     }
   }
-    
   update() {
-    var i, s, len = fws.length;
-    var updateSpark = function (s) {
-      circle.addVelocity.call(s);
-      circle.computeDecay.call(s, DECAY);
-      circle.computeGravity.call(s, GRAVITY);
-    };
-    for (i = 0; i < len; i++) {
-      updateSpark(s = fws[i]);
-      if (s.size < 0.1 || s.posX < 5 || s.posX > 395 || s.posY > 395) {
-        fws.splice(i, 1);
+    let len = this.fws.length;
+    for ( let i = len - 1 ; i >= 0; i--) {
+      const s = this.fws[i];
+      s.updateNextTick();
+      if ( s.size < 0.1 || s.posX < 5 || s.posX > 395 || s.posY > 395) {
+        this.fws.splice(i, 1);
         len -= 1;
       }
     }
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.fillRect(0, 0, cvsW, cvsH);
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    this.ctx.fillRect(0, 0, this.width, this.height);
   }
-  
   render() {
-      var i, s, len = fws.length;
-      fps += 1;
-      for (i = 0; i < len; i += 1) {
-        s = fws[i];
-        circle.draw.call(s);
+      const len = this.fws.length;
+      this.fps += 1;
+      for (let i = 0; i < len; i += 1) {
+        const s = this.fws[i];
+        this.draw(s);
       }
   }
-      
- 
-  if (cvs && cvs.getContext) {
-      ctx = cvs.getContext('2d');
-      cvsW = ctx.canvas.width;
-      cvsH = ctx.canvas.height;
-      cvsL = cvs.getBoundingClientRect().left;
-      cvsT = cvs.getBoundingClientRect().top;
-      // Register event listeners
-      cvs.addEventListener('mousedown', function (e) {
-        explode(e.clientX, e.clientY);  
-      }, false);
-      cvs.addEventListener('touchstart', function (e) {
-        explode(e.touches[0].pageX, e.touches[0].pageY);  
-      }, false);
-      setInterval(render, 0);
-      setInterval(update, 1000 / 60);
-      setInterval(fpsUpdate, 1000);
-    }
-
 }
 
