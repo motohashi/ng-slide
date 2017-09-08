@@ -35,8 +35,6 @@ export class SlidesComponent implements OnInit {
   ngOnInit() {
     this.slides = this._slideService.getAll();
     this.selectSlide(this.currentIndex);
-
-    console.log(this.slides)
     this.slides.forEach((_slide_data, index) => {
         this._slideBusService.register(index, _slide_data);
     });

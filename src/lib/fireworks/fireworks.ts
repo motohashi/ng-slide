@@ -5,7 +5,7 @@ const SIZE = 2.0;
 const DECAY = 0.98;
 const GRAVITY = 1.5;
 
-export class Spark {
+class Spark {
   public static radian = Math.PI * 2;
   public size = SIZE;
   static generateSpark(x, y) {
@@ -16,7 +16,7 @@ export class Spark {
       y,
       Math.cos(theta) * velocity,
       Math.sin(theta) * velocity,
-      Color.randHsl(100, 90, 60, 50, 90, 70).toString(),
+      Color.randHsl(100, 90, 55, 45, 1.0, 0.9).toString(),
       velocity,
       Math.random() > 0.5 ? true : false
     );
@@ -52,10 +52,10 @@ export class Spark {
   };
 }
 
-export class FireWorksRenderrer {
-  fws = [];
+class FireWorksRenderrer {
   public cvs;
   public ctx;
+  public fws;
   width;
   height;
   left;
@@ -64,10 +64,11 @@ export class FireWorksRenderrer {
   constructor(cvs) {
     this.cvs = cvs || document.getElementsByTagName('canvas');
     this.ctx = cvs.getContext('2d');
-    this.width = cvs.canvas.width;
-    this.height = cvs.canvas.height;
-    this.left = cvs.canvas.left;
-    this.top = cvs.canvas.top;
+    this.width = this.ctx.canvas.width;
+    this.height = this.ctx.canvas.height;
+    this.left = this.ctx.canvas.getBoundingClientRect().left;
+    this.top = this.ctx.canvas.getBoundingClientRect().top;
+    this.fws = [];
   }
   draw(spark) {
     this.ctx.beginPath();
@@ -81,16 +82,14 @@ export class FireWorksRenderrer {
     }
     this.ctx.fill();
   }
-  explode(x, y) {
-    let color;
+  public explode(x, y) {
     x -= this.left;
     y -= this.top;
-    color = Color.randHsl(100, 90, 60, 50, 90, 70).toString();
     for (let i = 0; i < QTY; i += 1) {
       this.fws.push(Spark.generateSpark(x, y));
     }
   }
-  update() {
+  public update() {
     let len = this.fws.length;
     for ( let i = len - 1 ; i >= 0; i--) {
       const s = this.fws[i];
@@ -103,7 +102,7 @@ export class FireWorksRenderrer {
     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     this.ctx.fillRect(0, 0, this.width, this.height);
   }
-  render() {
+  public render() {
       const len = this.fws.length;
       this.fps += 1;
       for (let i = 0; i < len; i += 1) {
@@ -113,3 +112,4 @@ export class FireWorksRenderrer {
   }
 }
 
+export {Spark, FireWorksRenderrer}

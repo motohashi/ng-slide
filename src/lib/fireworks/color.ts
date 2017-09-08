@@ -8,7 +8,8 @@ function cmp(val1, val2) {
   }
   const out = val1 - 0 || val2 - 0;
   // tslint:disable-next-line:curly
-  if ( out > 0 ) return 255;
+  if ( out > RGB_LIMIT ) return 255;
+  return out;
 }
 
 abstract class ColorType {
@@ -114,13 +115,14 @@ class HSL extends ColorType {
 class Color {
   rgb: RGB;
   hsl: HSL;
-  static randHsl(maxS, minS, maxL, minL, maxA, minA) {
+  public static randHsl(maxS, minS, maxL, minL, maxA, minA) {
     const hsl = new HSL(
       Math.floor(Math.random() * 360),
       parseInt(Math.random() * (maxS - minS) + minS, 10),
       parseInt(Math.random() * (maxL - minL) + minL, 10),
       cmp(Math.random() * (maxA - minA) + minA, 1)
     );
+    console.log(hsl);
     return hsl;
   }
 }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Location } from '@angular/common';
+import FireWorks from 'lib/fireworks';
 
 @Component({
   selector: 'app-root',
@@ -17,10 +18,12 @@ export class AppComponent implements OnInit {
   ) { }
   ngOnInit(): void {
     this.setCurrentClass();
+    FireWorks('canvas');
   }
   setCurrentClass() {
     // CSS classes: added/removed per current state of component properties
     this.camvasEffect = 'test';
     this.bgEffect = 'test';
   }
+
 }
