@@ -4,7 +4,6 @@ import {
   Component,
   Input,
   Output,
-  EventEmitter,
   OnInit,
   ViewChild,
   ComponentFactoryResolver

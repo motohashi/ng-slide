@@ -10,6 +10,7 @@ import { SpeechTextComponent } from './speech-text/speech-text.component';
 import { SlidesService } from './slides/slides.service';
 import { SlideComponent  } from './slides/slide/slide.component';
 import { SlideBusService } from './slides/slide-bus.service'
+import { EffectProviderBusService } from './effect-provider-bus.service'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -38,7 +39,7 @@ const appRoutes: Routes = [
     )
   ],
   exports: [ RouterModule ],
-  providers: [SlidesService, SlideBusService, SlidesService],
+  providers: [SlidesService, SlideBusService, SlidesService, EffectProviderBusService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

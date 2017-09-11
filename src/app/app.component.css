@@ -4,17 +4,8 @@
     overflow: hidden;
 } */
 
-#canvasOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: #33DA37;
-    width: 100%;
-    height: 100%;
-    mix-blend-mode: hard-light;
-}
 
-#bg {
+.spark,.wave {
     position: absolute;
     top: 0;
     left: 0;
@@ -27,7 +18,38 @@
     hsl(359, 93%, 48%));
     background-size: 400% 400%;
     animation: AnimationName 10s ease infinite;
+    mix-blend-mode: hard-light;
 }
+
+  .canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+   }
+
+  .container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  .jojoni {
+    width: 100%;
+    height: 100%;
+    background: url("/assets/jojoni.png");
+    position: absolute;
+    background-size: 100% auto;
+    opacity: 1;
+  }
+  
+  .kaizoku {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background: url("/assets/kaizoku.png");
+    background-size: 100% auto; 
+    opacity: 1;
+  }
 
 @keyframes AnimationName {
     0% { background-position: 50% 0% }

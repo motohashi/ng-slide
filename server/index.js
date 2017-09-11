@@ -27,5 +27,5 @@ app.get('/', function(req, res, next) {
 });
 
 app.get('/auth', function(req, res, next) {
-  watsonAuthService.getAuthToken().then((token,err)=>res.json({token}))  
+  watsonAuthService.getAuthToken().then((token,err)=>res.json({token}));
 });

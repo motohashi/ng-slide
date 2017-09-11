@@ -1,7 +1,10 @@
+import 'rxjs/add/operator/concatMap';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Location } from '@angular/common';
 import FireWorks from 'lib/fireworks';
+import { EffectProviderBusService } from './effect-provider-bus.service'
+import { ChangeDetectorRef } from '@angular/core'
 
 @Component({
   selector: 'app-root',
@@ -10,20 +13,39 @@ import FireWorks from 'lib/fireworks';
 })
 
 export class AppComponent implements OnInit {
-  camvasEffect;
+  canvasEffect;
   bgEffect;
   constructor(
     private route: ActivatedRoute,
-    private location: Location
-  ) { }
+    private location: Location,
+    private _effectService: EffectProviderBusService,
+    private ref: ChangeDetectorRef
+  ) {
+    this.canvasEffect = '';
+    this.bgEffect = '';
+  }
   ngOnInit(): void {
-    this.setCurrentClass();
-    FireWorks('canvas');
+    this._effectService.effectEvent$.concatMap((className) => {
+      console.log(className);
+      return this.animate( className );
+    }).subscribe( ( className ) => {
+      this.canvasEffect = '';
+      this.bgEffect = '';
+      this.ref.detectChanges();
+    });
   }
-  setCurrentClass() {
-    // CSS classes: added/removed per current state of component properties
-    this.camvasEffect = 'test';
-    this.bgEffect = 'test';
+  animate( className ) {
+    if ( className === "spark") {
+      this.bgEffect = 'slide';
+      this.canvasEffect = className;
+      this.ref.detectChanges();
+      return FireWorks('canvas', 4000);
+    } else {
+      this.bgEffect = className;
+    }
+    this.ref.detectChanges();
+    return new Promise((resolve, reject) => {
+      setTimeout(resolve, 5000);
+    });
   }
-
 }

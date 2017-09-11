@@ -1,10 +1,11 @@
 :host {
-  color:black;
   position:relative;
   height:inherit;
   overflow:hidden;
   display:block;
   height: 100%;
+  width: 100%;
+  top: 20%;
 }
 
 div.page {

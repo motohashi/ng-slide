@@ -476,7 +476,7 @@ export class SlideComponent {
   }
 
   close() {
-    this.closeNotify.next();
+    this.closeNotify.emit();
   }
 }
 
