@@ -122,7 +122,6 @@ class Color {
       parseInt(Math.random() * (maxL - minL) + minL, 10),
       cmp(Math.random() * (maxA - minA) + minA, 1)
     );
-    console.log(hsl);
     return hsl;
   }
 }

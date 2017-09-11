@@ -15,6 +15,9 @@ export default function(cvs) {
    fwr.cvs.addEventListener('touchstart', function (e) {
      fwr.explode(e.touches[0].pageX, e.touches[0].pageY);
    }, false);
+   setInterval(function(){
+     fwr.explode(100*Math.random(),100*Math.random());
+   } , 1000)
    setInterval(fwr.render.bind(fwr), 0);
    setInterval(fwr.update.bind(fwr), 1000 / 60 );
    return fwr;

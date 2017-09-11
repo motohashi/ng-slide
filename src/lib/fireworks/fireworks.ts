@@ -3,7 +3,7 @@ import { RGB, HSL, Color } from './color';
 const QTY = 360;
 const SIZE = 2.0;
 const DECAY = 0.98;
-const GRAVITY = 1.5;
+const PSEUDO_GRAVITY = 1.5;
 
 class Spark {
   public static radian = Math.PI * 2;
@@ -41,14 +41,14 @@ class Spark {
     this.size *= d;
     return this;
   }
-  computeGravity(g) {
+  computePseudoGravity(g) {
     this.posY += g;
     return this;
   }
   updateNextTick() {
     this.addVelocity();
     this.computeDecay(DECAY);
-    this.computeGravity(GRAVITY);
+    this.computePseudoGravity(PSEUDO_GRAVITY);
   };
 }
 
@@ -72,7 +72,7 @@ class FireWorksRenderrer {
   }
   draw(spark) {
     this.ctx.beginPath();
-    this.ctx.arc(spark.posX, spark.posY, spark.size, 0, spark.radian, true);
+    this.ctx.arc(spark.posX, spark.posY, spark.size, 0, Spark.radian, true);
     if ( spark.sw ) {
       this.ctx.fillStyle = "#FFFFFF";
       spark.sw = false;
@@ -94,7 +94,7 @@ class FireWorksRenderrer {
     for ( let i = len - 1 ; i >= 0; i--) {
       const s = this.fws[i];
       s.updateNextTick();
-      if ( s.size < 0.1 || s.posX < 5 || s.posX > 395 || s.posY > 395) {
+      if ( s.size < 0.1 || s.posX < 5 || s.posX > this.width || s.posY > this.height) {
         this.fws.splice(i, 1);
         len -= 1;
       }
