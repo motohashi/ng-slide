@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "webpack-dev-server --port=4200",
+    "start": "ng build && NODE_ENV=production PORT=8080 ts-node server",
     "build": "webpack",
     "test": "karma start ./karma.conf.js",
     "lint": "ng lint",
@@ -43,6 +43,7 @@
     "uglifyify": "^4.0.2",
     "watson-developer-cloud": "^2.39.0",
     "watson-speech": "^0.33.1",
+    "ts-node": "~3.0.4",
     "zone.js": "^0.8.4"
   },
   "devDependencies": {
@@ -62,7 +63,6 @@
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
     "protractor": "~5.1.2",
-    "ts-node": "~3.0.4",
     "tslint": "~5.3.2",
     "typescript": "~2.3.3"
   }
