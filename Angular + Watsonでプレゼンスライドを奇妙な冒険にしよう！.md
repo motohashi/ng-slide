@@ -22,10 +22,9 @@
 IBM Watsonアカウントへの登録を事前に行ってください。また,今回のサンプルアプリケーションは以下の開発環境で作成しました。
 
 ### 2.1 構成
-![Screen Shot 2017-08-01 at 17.50.24.png](https://qiita-image-store.s3.amazonaws.com/0/21849/cd513d59-4e15-a995-6114-f88cbaf03099.png "Screen Shot 2017-08-01 at 17.50.24.png")
 
-上記のような構成で実現します。
-Wastonと書かれている側では,音声認識を行うSpeech To Textサービスとそれを利用するための認証を行います。また,スライドを構築するWebサーバーをAngularで,Token取得をするバックエンドをNodejsと二種のアプリケーションをローカルに構築します。
+構成の実装は二段階に分かれます。Watson Speech To Textをユーザーが使用出来るようにするために、ExpressにAPIを用意して、WatsonのAPIトークンを発行できるようにします。第二弾階では、ユーザーんもブラウザからそのAPIトークンを使って、Watsonにアクセス出来るようにします。
+
 
 
 ### 2.2 Watson Speech to Text
@@ -34,6 +33,7 @@ Watson Speech to Textは文法や日本語に標準対応した音声の文字�
 詳しくはこちらの[公式ページ](https://www.ibm.com/watson/jp-ja/developercloud/speech-to-text.html)を参照して下さい
 
 ## 3 Watson Speech to Textを試す
+
 ### 3.1 Watson Speech to Textを利用する準備
 アプリケーションに組み込む前に,音声の文字起こしのテストをしてみます。「音声　フリー素材 wav」などで検索すれば,利用フリーの音声ファイルがみつかると思うので,用意してください。公式ドキュメントでは `明瞭な話し方の録音された音声` を要求しているため,本記事ではアナウンサーの音声ファイルでテストしました。
 
@@ -47,50 +47,14 @@ Watsonサービスの作成を押下後のリストよりSpeech To Textを選択
 
 ここでアプリ名は`sample-stt-application`など判別できる名前をつけてください。
 
-サービス資格情報から先ほど作成した資格情報のアクション[資格情報の表示]を選択し `username`と `password`を残しておきます。
+サービス資格情報から先ほど作成した資格情報のアクション[資格情報の表示]を選択すると以下のような画面が表示されます。
 
 
 ![Screen_Shot_2017-07-24_at_11_53_18.png](https://qiita-image-store.s3.amazonaws.com/0/21849/321e9163-d7f5-86a3-db27-709471fb95b6.png "Screen_Shot_2017-07-24_at_11_53_18.png")
 
 
+このjsonデータは後ほどcredentail.jsonというファイルに書き写します。これで準備完了です。
 
-これで準備完了です。
-
-### 3.2 Watson Speech to Textの精度の確認
-
-[APIドキュメント](https://www.ibm.com/watson/developercloud/speech-to-text/api/v1/?curl#get_model)を参照し試してみましょう。
-
-今回利用する音声ファイルはwav形式のためheaderには `Content-Type: audio/wav`を指定します。
-また,日本語の音声ファイルのため `ja-JP_BroadbandModel`を指定します。
-実行するコマンドは以下のようになります。
-
-`<service_username>:<service_password>`は先程Bluemixコンソールで取得したものを,`<filepath>/sample.wav`は用意したファイルへのpathで置換して下さい。
-
-```
-$ curl -X POST -u <service_username>:<service_password> \
---header "Content-Type: audio/wav" \
---data-binary @"<filepath>/sample.wav" \
-"https://stream.watsonplatform.net/speech-to-text/api/v1/models/ja-JP_BroadbandModel/recognize"
-```
-
-認証情報などのあとに以下のようなjsonレスポンスが表示されます。クリアな音声ファイルが用意できた場合,このように形態素解析済みの文言が高精度に取得できます。
-
-```json
-{
-   "results": [
-      {                                                                                                                                                                                                                                                "alternatives": [
-            {
-               "confidence": 0.832,
-               "transcript": "さあ 作業 の 途中 で ございます が ここ で メール 着信 の お知らせ です "
-            }
-         ],
-         "final": true                                                                                                                                                                                                                              }
-   ],
-   "result_index": 0
-```
-
-
-## 4 実装
 
 ### 4.1 Angularプロジェクトの概要
 
@@ -100,17 +64,37 @@ Angularのプロジェクトはangular-cliを使用することで簡単に作�
 
   |ツール|バージョン|備考|
   |--|--|--|
+  |Mac OS|Siera||
   |node|v7.8.0||
   |npm|v4.2.0||
   |angular-cli|v1.2.0|サンプルコードをcloneした場合はインストール不要|
 
-その他使用しているライブラリの情報はpackage.json,package-lock.jsonに記載しています。また,[angular-cli](https://github.com/angular/angular-cli)を使用しています。新規のプロジェクトから作成を始める場合は,所定のバージョンのangular-cliを`npm install -g @angular/cli`でグローバルインストールし,ターミナルなどのコンソールで以下のコマンドを入力します。
+その他使用しているライブラリの情報はpackage.jsonに記載しています。また,[angular-cli](https://github.com/angular/angular-cli)を使用しています。新規のプロジェクトから作成を始める場合は,所定のバージョンのangular-cliを`npm install -g @angular/cli`でグローバルインストールし,ターミナルなどのコンソールで以下のコマンドを入力します。
 
 ```shell
-ng new ${project}
+ng new ${project} または、 ローカルディレクトリのnode_modulesのangular-cliを使用する場合は、$(npm bin)/ng new ${project}
 ```
 
-上の${project}に任意のプロジェクト名を入れるとプロジェクト名のディレクトリが作成され,配下にプロジェクトのひな型が作成されます。この状態で,プロジェクト配下に移動し,ng serveあるいは,npm startを実行すると,angular-cli内部で設定されているwebpack-devserverが起動し,ひな型のWEBアプリケーションが起動します。webpackの設定は通常angular-cliのnode_modulesの中に隠蔽されているため,ngコマンドを使っている限り設定を変更することができませんが,webpackの設定を柔軟に行いたい場合などにおいて,
+上の${project}に任意のプロジェクト名を入れるとプロジェクト名のディレクトリが作成され,配下にプロジェクトのひな型が作成されます。ng new projectで作成したプロジェクトのファイル階層は以下のようになります。（yarnを使用している場合や、バージョンの違いによって多少異なる可能性があります。）
+
+```
+project
+├── .angular-cli.json
+├── .editorconfig
+├── .git
+├── .gitignore
+├── README.md
+├── e2e
+├── karma.conf.js
+├── node_modules
+├── package.json
+├── protractor.conf.js
+├── src
+├── tsconfig.json
+└── tslint.json
+```
+
+この状態で,プロジェクト配下に移動し,ng serveあるいは,npm startを実行すると,angular-cli内部で設定されているwebpack-devserverが起動し,ひな型のWEBアプリケーションが起動します。webpackの設定は通常angular-cliのnode_modulesの中に隠蔽されているため,ngコマンドを使っている限り設定を変更することができませんが,webpackの設定を柔軟に行いたい場合などにおいて
 
 ```shell
 ng eject
@@ -129,7 +113,7 @@ angular-cliを利用する場合,.angular-cli.jsonにbuildの設定が書き出�
 
 この設定は,main.tsの設定に従いテンプレートとしてのindex.htmlの中に設定されている後述のAngularのコンポーネントをコンパイルしていき,最終的にDOMレンダリングされたindex.htmlを生成する設定になります。この設定は,実は,index.html上にAngularを含む最終的にビルドされてバンドルされたjsをscriptタグで発火させているに過ぎませんが,より発展した設定を行うことで,WEBサーバーのレスポンスとしてサーバサイドレンダリングされたhtmlを返すことが出来たり,コンポーネントのlazy loadができるようにすることで,ユーザーエクスペリエンスを向上させることができます。main.tsは以下のようなコードが記述されています。
 
-```typescript
+```ts
 //main.ts
 platformBrowserDynamic().bootstrapModule(AppModule);
 ```
@@ -138,7 +122,7 @@ AppModuleは,Angularのモジュールです。Angularのモジュールは後�
 
 #### Angularのモジュールの構成
 
-```typescript
+```ts
 //app.module.ts
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -186,9 +170,9 @@ export class AppModule { }
 
 以上は本サンプルコードに使用されているapp.module.tsのソースコードになります。この例に沿って説明を行います。まず,@NgModuleはデコレータでAppModuleクラスがAngularのモジュールであることを定義するとともに,設定を渡します。@NgModuleの設定値に関しては,今回よく使われる上記の例のみを説明します。そのほかの設定値に興味がある方は公式のドキュメントをご覧ください。それぞれ指定されているコンポーネントやモジュールやサービスの詳細についてはここでは割愛します。
 
-## declations
+## declarations
 
-  前述のmain.tsで呼ばれたhtmlファイル内において,declationsで指定されているそれぞれのコンポーネントに指定されているセレクタの条件に当てはまるタグをコンパイルできるようにします。これはこのモジュール内で指定されているすべてのコンポーネントのテンプレートのタグにも有効になり,コンポーネントのセレクタの条件に当てはまるタグが階層的にコンポーネントに置き換わるようになります。また,Directiveや,Pipeを指定するとそれらをモジュールの中で指定されている全てのコンポーネント内で使用することができるようになります。
+  前述のmain.tsで呼ばれたhtmlファイル内において,declarationsで指定されているそれぞれのコンポーネントに指定されているセレクタの条件に当てはまるタグをコンパイルできるようにします。これはこのモジュール内で指定されているすべてのコンポーネントのテンプレートのタグにも有効になり,コンポーネントのセレクタの条件に当てはまるタグが階層的にコンポーネントに置き換わるようになります。また,Directiveや,Pipeを指定するとそれらをモジュールの中で指定されている全てのコンポーネント内で使用することができるようになります。
 
 ## imports
 
@@ -212,7 +196,7 @@ export class AppModule { }
 
 コンポーネントはそのコンポーネント内で指定されている独自のセレクタ条件にマッチするHTMLのタグを,内部に設定されたHTMLテンプレートに置き換えます。これをレンダリングまたは,Angularの場合はコンパイルと呼びます。さらに,そのテンプレート内の一部分をコンポーネントのデータと連動させることができ,ユーザーの操作や通信によってデータが変更された場合に画面表示やそのほかのデータへの影響を即座に反映させることができます。このように内部データ同士の変更や内部データと画面描画を連動させるように設定することをデータバインディングと呼びます。テンプレートにはこのデータバインディングと画面表示を制御するための様々な記法があります(ここでは割愛します)。また,テンプレート内で更にモジュールに定義済みのコンポーネントのセレクタ条件にマッチするタグを埋め込むことで連鎖的にコンポーネントをコンパイルすることができます。以下は単純なコンポーネントの例です。
 
-```typescript
+```ts
 import { Component } from '@angular/core';
 
 export class Example {
@@ -240,7 +224,169 @@ export class AppComponent {
 }
 ```
 
-以上の例では,`<my-app></my-app>`というタグをこのコンポーネントで定義されているテンプレートに置き換え,textboxに入力した文字をh1要素の文字列として即座に反映するコンポーネントの例になります。innerTextではマスタッシュ記法と呼ばれる{{}}で囲まれた文字列を,コンポーネント内の変数の参照に対応させることで,inputの入力には[(ngModel)]="example.text"のように[(ngModel)]の右辺をコンポーネント内の変数の参照に対応させることでデータバインディングを行うことができます。ちなみに[(ngModel)]の[]はinputプロパティの指定に使うシンタックスで内部変数が変更されるとtextboxの文字列も変更されるように単方向データバインディングします。この場合,textboxへの入力は内部変数には反映されません。そして,()はoutputプロパティの指定を表し指定されたプロパティの変更に応じて動作する処理を渡します。[(ngModel)]と指定するとプロパティの値の変更とtextboxの値を連動させ,ユーザーの入力を内部変数の変更と連動させることができます。ただし(ngModel)の指定は機能しません。これは,[ngModel]が内部変数のプロパティにsetterを付加するのに対し,(ngModel)単体の場合は未定義のsetterに対して入力値を代入するというような動作をしていると考えられます。stylesはこのコンポーネントの内部だけで有効なスタイルを指定できます。templateやstylesは外部ファイルに置き換えて,パスを指定することもできます。
+以上の例では,`<my-app></my-app>`というタグをこのコンポーネントで定義されているテンプレートに置き換え,textboxに入力した文字をh1要素の文字列として即座に反映するコンポーネントの例になります。innerTextではマスタッシュ記法と呼ばれる{{}}で囲まれた文字列を,コンポーネント内の変数の参照に対応させることで,inputの入力には[(ngModel)]="example.text"のように[(ngModel)]の右辺をコンポーネント内の変数の参照に対応させることでデータバインディングを行うことができます。ちなみに[(ngModel)]の[]はinputプロパティの指定に使うシンタックスで内部変数が変更されるとtextboxの文字列も変更されるように単方向データバインディングします。この場合,textboxへの入力は内部変数には反映されません。そして,()はoutputプロパティの指定を表し指定されたプロパティの変更に応じて動作する処理を渡します。[(ngModel)]と指定するとプロパティの値の変更とtextboxの値を連動させ,ユーザーの入力を内部変数の変更と連動させることができます。ただし(ngModel)の指定は機能しません。これは,[ngModel]が内部変数のプロパティにsetterを付加するのに対し,(ngModel)単体の場合は未定義のsetterに対して入力値を代入するというような動作をしていると考えられます。stylesはこのコンポーネントの内部だけで有効なスタイルを指定できます。templateやstylesは外部ファイルに置き換えてパスを指定することもできます。
+
+### 4.2 認証用APIを作成する
+
+### 4.2.1 認証用APIのエンドポイントを設定する
+
+AngularプロジェクトはTypeScriptでの開発が主流であるため、ここでは、認証用APIのモジュールはTypescriptで作ることにします。また、ExpressサーバーはES6で書くことにします。これは、tsconfig.jsonの設定をすることで、ESモジュールを読み込めるようにすることで、TypescriptとESどちらも読み込めるようになります。ここでは、Typescriptを実行できる環境としてts-nodeとtypescirptをインストールします。加えてExpressもインストールしておきましょう。body-parserはexpressのテンプレートエンジン拡張用のプラグインです。(最新版のangular-cliでは、ts-nodeはpacakge.jsonに最初から入っていますのであればインストールは不要です。)
+
+```shell
+npm install --save express body-parser typescript ts-node
+```
+
+ここで、angular-cliで作成したプロジェクトのルートフォルダに、serverディレクトリを作成します。nodeスクリプト(ts-nodeも同様で)はディレクトリ配下にindex.jsを配置すること、または、package.jsonのmainオプションにファイル名を指定することで、ディレクトリ名を指定してスクリプトを読み込むことが出来ます。そこで、作成したserverディレクトリにindex.jsを配置しましょう。ここでは以下のようにindex.jsを実装します。
+
+```javascript
+const path = require('path');
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const server = require('http').createServer(app);
+const port =  process.env.PORT || 3000;
+const watsonAuthService = require('./watson-auth-service');
+
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTION');
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
+
+app.use(bodyParser());
+
+app.use(express.static(path.resolve(__dirname,'../','dist')));
+
+server.listen(port, process.env.OPENSHIFT_NODEJS_IP || process.env.IP || undefined, function() {
+  console.log('Express server listening on %d, in %s mode', port, app.get('env'));
+});
+
+app.get('/auth', function(req, res, next) {
+  watsonAuthService.getAuthToken().then((token,err)=>res.json({token}));
+});
+
+```
+ここで、httpモジュールはnodeの標準ライブラリになります。staticは、server/index.jsからexpress.staticはtemplateやjsに対するパスを解決して呼び出せるようにします。ここでは、Angularアプリケーションのbuild済みのファイルは全てdistディレクトリに配置されるため、distディレクトリを指定しておき、後ほどindex.htmlを読み込めるようにします。 watsonAuthServiceはエンドポイント/authにGETメソッドでリクエストが送られた際にWatsonのアクセストークンを取得できるようにするモジュールで後ほど実装します。これで最低限のserverの準備が出来ました。次に上述のwatsonAuthServiceを実装します。
+
+### 4.2.2 認証用APIを実装する
+
+serverディレクトリに、watson-auth-service.tsを作成し、実装します。ここで、実装に入る前にwatson-developer-cloudモジュールをインストールしておきます。
+
+```sh
+npm install --save watson-developer-cloud
+```
+
+それでは実装に入りましょう。以下のように、watson-developer-cloudに実装されているgetTokenメソッドを使用して、取得できたらトークンを渡して処理を継続し、失敗したら、error内容を渡して処理を継続するPromiseオブジェクトを作成します。それらのレスポンスは前述の/authエンドポイントにリクエストが投げられたとき、レスポンスとしてアクセストークンを返すように設定されています。
+
+```ts
+import * as watson from 'watson-developer-cloud';
+import * as path from 'path';
+import * as fs from 'fs';
+
+const secret = JSON.parse(fs.readFileSync(path.join(__dirname, 'credential.json'), 'utf8'));
+const authConfig = {
+  version: 'v1',
+  url: secret.url,
+  username: secret.username,
+  password: secret.password
+};
+const watsonAuthService = watson.authorization(authConfig);
+export function getAuthToken(): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    watsonAuthService.getToken({ url: authConfig.url }, (err, token: string) => {
+      if (err) { reject(err); }
+      resolve(token);
+    });
+  });
+}
+```
+
+以上のファイルは、serverディレクトリの中にあるcredential.jsonというファイルからjson形式で、Watsonのアカウント情報を取得し、watson-developer-cloudモジュールにセットするようにしています。
+そして、その認証情報を使用し、ユーザーにアクセストークンを取得させる処理を作成しています。よって、3.1節の画像にある、url、username、passwordを記述したcredential.jsonというファイルをserverディレクトリ配下に作成します。
+
+```json
+{
+  "url": "your api url",
+  "username": "your username",
+  "password": "your password"
+}
+```
+
+これでcredential.jsonを作成できました。ここで、Bluemix上のSpeech To Textを使用するためのアクセストークンが、ローカルサーバを起動して取得できるか確かめてみます。
+
+
+### 4.2.3 アクセストークンをローカルサーバを経由して取得する
+
+node.jsの実行環境ではカレントディレクトリにあるnode_modules内のnpmパッケージの実行ファイルのパスは`npm bin`というコマンドで取得できるようになっています。そのことを利用してnpmパッケージをグローバルインストールしなくても、以下のようにカレントディレクトリ内にローカルインストールされたのnpmパッケージの実行ファイルを実行する事ができます。以下の例では、ローカルインストールされたts-nodeを利用してserverを起動します。serverディレクトリ内にindex.jsを配置しているため、呼び出されるファイルはindex.jsになります。
+
+```
+$(npm bin)/ts-node server
+```
+
+この時、Expressのデフォルトportの3000が空いていればhttp://localhost:3000/authにブラウザからアクセスすると、アクセストークンが取得できます。無事アクセストークンを取得することが出来たら、今度は、Bluemix上にExpressサーバをデプロイしてみましょう。
+
+### 4.3 Bluemix上のCloudFoundryにnode.jsアプリケーションをデプロイする
+
+### 4.3.1 Bluemix CLIをインストールする
+[こちらのリンク](https://console.bluemix.net/docs/cli/reference/bluemix_cli/all_versions.html#bluemix-cli-)からBlumix CLIをインストールすることが出来ます。
+
+＊ Cloud Foundry CLIのみを使ってデプロイすることも可能です。Bluemix CLIにはCloud Foundry CLIが内蔵されているため、どちらを使用しても構いません。ここでは、Bluemix CLIのコマンドを利用して、デプロイを行います。
+
+### 4.3.2 Cloud Foundryへのデプロイ設定を行う
+
+node.jsアプリケーションをデプロイするのは、とても簡単です。.cfignoreファイルにデプロイに不必要なファイル、ディレクトリを記述しておくと、デプロイ時に除外されるため、必要なファイルのみをデプロイする事ができます。また、node.jsのフロントエンド側のスクリプトは全てビルド済みのファイルだけデプロイすれば良いため、ビルド前のスクリプトや本番環境で使われないファイルやnode_modulesなどはデプロイから外しておくことで、デプロイ時間を短縮できます。それらを踏まえた上で、.cfignoreの内容は以下のようになります。
+
+```
+e2e
+src
+node_modules
+.nscode
+.editorconfig
+.gitignore
+tslint.json
+yarn.lock
+karma.conf.json
+*.md
+asesets
+typings
+manifest.yml
+proxy.config.json
+```
+
+Angularアプリは全てdistにビルドされるため、必要なものはts-nodeを動かすためのファイルと、Expressとそれによって配信するモジュールとdistだけになります。また、Cloud Foundryでは、デプロイ時に、Dependenciesに記述のあるパッケージのみnpm installが実行されます。よって、package.jsonからproductionに必要のないnpmパッケージは、devDependenciesに記述を移しておきましょう。このチュートリアルで使用したnpmパッケージでproductionに必要な物は最終的に以下のようになります。
+
+```json
+  "dependencies": {
+    "body-parser": "^1.18.0",
+    "typescript": "~2.3.3",
+    "express": "^4.15.4",
+    "watson-developer-cloud": "^2.39.0",
+    "watson-speech": "^0.33.1",
+    "ts-node": "~3.0.4"
+  }
+```
+
+### 4.3.3 Cloud Foundryにデプロイを行う
+
+BluemixにログインしてカタログからCloud Foundryを選択します。選択すると、以下のような設定画面が表示されるので、今回の例では以下のように設定しました。
+以上のように設定を終えたら次にホストにデプロイするためにはmanifest.ymlというファイルを作成し、プロジェクトのディレクトリに配置して設定を行います。設定は以下の通りです。
+
+```yaml
+applications:
+- path: .
+  name: ng-slide
+  memory: 512M
+  instances: 1
+  domain: mybluemix.net
+  disk_quota: 1024M
+```
+
+pathはmanifest.ymlのパスを基準にディレクトリを指定します。nameは、applicationに設定した名前を使用します。
+
+### 4.3.3 BluemixのCloud Foundryを使用可能にする
+
+
 
 ### 4.2 Angularでスライドを作成する
 
@@ -252,7 +398,7 @@ Angularの基本的な構成を踏まえ実際にスライドの表示と切り�
 angular-cliのデフォルトの設定ではhtmlをlaw-loaderで読み込むようになっていますが
 そのimport先の型が定まっていないため,importすることができません。そのため`src/typings.d.ts` に下記のような指定が必要となります。
 
-```
+```ts
 declare module "*.html" {
   const content: string;
   export default content;
@@ -414,8 +560,6 @@ export class SlideBusService {
 }
 
 ```
-
-
 slides.data.tsは今回用意したスライドのデータを保存しています。DBなどからデータを直接受け取る場合は用意する必要はありません。形式上titleキーを設定していますが,今回のアプリケーションでは使用していません。以下のように設定することで,任意のパスからHTMLを読み込むことができます。今回はtemplate配下には任意のHTMLを配置しています。
 ページを増やす際はここにpage4,page5,,,と追加していくことになります。
 
