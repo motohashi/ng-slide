@@ -25,7 +25,6 @@ export class SpeechTextComponent implements OnInit {
   }
 
   ngOnInit() {
-    // this._effectService.effectEvent$.emit();
   }
 
   getTokenAsync() {

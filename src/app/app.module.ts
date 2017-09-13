@@ -15,8 +15,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 
 const appRoutes: Routes = [
-  { path: 'slides', component: SlidesComponent },
-  { path: '',      component: AppComponent },
+  { path: '', component: AppComponent }
 ];
 
 @NgModule({
