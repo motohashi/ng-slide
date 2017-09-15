@@ -20,9 +20,9 @@
 
 IBM Watsonアカウントへの登録を事前に行ってください。また,今回のサンプルアプリケーションは以下の開発環境で作成しています。
 
-  |ツール|バージョン|備考|
+  |環境情報|バージョン|備考|
   |--|--|--|
-  |Mac OS|Siera||
+  |Mac OS|Sierra||
   |node|v7.8.0||
   |npm|v4.2.0||
   |angular-cli|v1.2.0|サンプルコードをcloneした場合はインストール不要|
@@ -33,6 +33,10 @@ IBM Watsonアカウントへの登録を事前に行ってください。また,
 
 構成の実装は三段階に分かれます。第一段階ではWatson Speech To Textをユーザーが使用出来るようにするために、ExpressにAPIを用意して、WatsonのAPIトークンを発行できるようにしてWEBアプリケーションとして公開できるようにします。第二段階では、ブラウザからそのアクセストークンを使って、Watsonにアクセスして音声認識が出来るようにします。第三段階では、スライドプレゼン用のアプリケーションを作成し、実際のプレゼンで使われそうな言葉を認識させて、面白いエフェクトが出せるようにします。なお、先に完成物が気になった方は[こちら](https://github.com/motohashi/ng-slide)を御覧ください。デモは以下のようになります。
 
+![jojo.gif](images/jojo.gif "jojo-gif")
+
+![jojo.gif](images/slide.gif "slide-gif")
+
 
 ### 2.2 Watson Speech to Text
 Watson Speech to Textは文法や日本語に標準対応した音声の文字書き起こしサービスです。音をそのまま書き起こすのではなく文法や辞書を加味し書き起こすため正確な書き起こしが実現できます。
@@ -40,7 +44,7 @@ Watson Speech to Textは文法や日本語に標準対応した音声の文字�
 詳しくはこちらの[公式ページ](https://www.ibm.com/watson/jp-ja/developercloud/speech-to-text.html)を参照して下さい。
 
 
-### 3 アプリケーション用のプロジェクトを作成する。
+### 3 アプリケーション用のプロジェクトを作成する
 
 #### Angularプロジェクトを作成する
 
@@ -166,7 +170,6 @@ export function getAuthToken(): Promise<string> {
 ```
 
 これでcredential.jsonを作成できました。ここで、Bluemix上のSpeech To Textを使用するためのアクセストークンが、ローカルサーバを起動して取得できるか確かめてみます。
-
 
 ### 4.2.3 アクセストークンをローカルサーバを経由して取得する
 
@@ -674,7 +677,8 @@ export class SlidesComponent implements OnInit {
 }
 ```
 
-slides.componentのcurrentIndexというパラメータで現在何ページ目のスライドなのかを管理します。ここで子コンポーネントapp-slideに対して[html]要素を@Inputに受け渡しています。(*ngIf)によってcurrentIndexとslideに割り当てられた番号が一致した時にslideを表示するようになります。closeは新規に開かれたコンポーネント以外のcomponentに対してコールバックを設定しています。今回はスライドの管理はcurrentIndexの値のみで実現できているので設定する必要はありませんが,このように親のコンポーネントから必要な関数を@Outputに渡すことで子コンポーネント側で任意のコールバックを設定することができます。
+SlidesComponentのcurrentIndexというパラメータで現在何ページ目のスライドなのかを管理します。
+次に、SlidesComponentのテンプレートをみてみましょう。
 
 ```html
 //slides.component.html
@@ -682,7 +686,10 @@ slides.componentのcurrentIndexというパラメータで現在何ページ目�
   <app-slide [html]="slide.page" *ngIf="currentIndex==i" (close)="selectSlide(null)" ></app-slide>
 </ng-container>
 ```
-slide.serviceは,slideのデータを取得するためのクラスです。今回はデータをそのままファイルに保存しているため,データをファイルから読み取るメソッドのみを定義しています。実際の運用では,サーバーなどからデータを取得することもあるため,データをどこから取得するか,どのタイミングで取得するかによって様々なメソッドが実装されます。
+
+ここで子コンポーネントのapp-slideに対して[html]要素にhtml文字列をパラメータとして与えると、そのHTMLを表示することができるコンポーネントとして設計しています。
+
+次にServiceクラスの説明に入ります。
 
 ```ts
 //slides.service.ts
@@ -698,7 +705,36 @@ export class SlidesService {
 }
 ```
 
-@Outputなどで設定された関数のイベントを管理するクラスをevent busなどと呼びます。event busではコンポーネント間のコールバックをどのように制御するかを設定します。以下の例では,新たに子コンポーネントが開かれた場合のイベント処理をnotifyOpenで定義し,子コンポーネント初期化時にonOtherSlideOpenというイベントを設定します。
+SlideServiceによって、以下slide.data.tsに設定したHTMLを取得することが出来ます。
+
+```ts
+//slides.data.ts
+import page1 from './slide/template/1.html';
+import page2 from './slide/template/2.html';
+import page3 from './slide/template/3.html';
+
+export const SLIDES = [
+  {
+    title: 'start',
+    page: page1
+  },
+  {
+    title: 'middle',
+    page: page2
+  },
+  {
+    title: 'end',
+    page: page3
+  }
+]
+```
+
+slide.pageというパラメータにはHTML文字列が入っており、これをslides.component.htmlで渡してあげることによって、表示されるページを切り替えることが出来ます。(*ngIf)によって矢印キーを押した時に変化するcurrentIndexの値とslideに割り当てられたインデックスが一致する時、slideが表示されるようになります。
+
+
+
+
+@Outputで設定された関数のイベントを管理するクラスをevent busなどと呼びます。event busではコンポーネント間のコールバックをどのように制御するかを設定します。以下の例では,新たに子コンポーネントが開かれた場合のイベント処理をnotifyOpenで定義し,子コンポーネント初期化時にonOtherSlideOpenというイベントを設定します。
 
 
 ```ts
@@ -909,16 +945,50 @@ bgEffectの値をclass値にbindingすることで、bgEffectの値によって�
 </div>
 ```
 
+bgEffectの値がjojoniの値になった時に設定するCSSは以下のように設定します。
+
+```css
+  .container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  .jojoni {
+    width: 100%;
+    height: 100%;
+    background: url("/assets/jojoni.png");
+    position: absolute;
+    background-size: 100% auto;
+    opacity: 1;
+    animation: jojolike .1s infinite;
+  }
+
+
+  @keyframes jojolike {
+    0% {transform: translate(0px, 0px) rotateZ(0deg)}
+    25% {transform: translate(4px, 4px) rotateZ(1deg)}
+    50% {transform: translate(0px, 4px) rotateZ(0deg)}
+    75% {transform: translate(4px, 0px) rotateZ(-1deg)}
+    100% {transform: translate(0px, 0px) rotateZ(0deg)}
+  }
+```
+
+
 これで、bgEffectの値によって、背景のエフェクトが変わる処理が実装できました。実際にボタンを押して、徐々にという言葉を録音してみましょう。上手くいくと以下のようにアニメーションが走ります。
+
+![jojo.gif](images/jojo.gif "jojo.gif")
 
 
 以上で、このチュートリアルは終了になります。
 
 #### おまけ
 
-ソースコードには、Canvasで、「ありがとう」という言葉が認識されると、花火が打ち上がるコードを収録しています。Canvas利用
+発表の最後には「ありがとうございました。」と締めることが多いですよね。ということで、ソースコードには、Canvasで、「ありがとう」という言葉が認識されると、花火が打ち上がるコードを収録しています。
 
+![fireworks.gif](images/fireworks.gif "fireworks.gif")
 
+このようにtemplateにcanvas要素を差し込むことで、Canvasを利用したリッチなアニメーションをつけることも出来ます。実装が気になる方は、ソースコードを見てみてください。
 
 
 ## 6 終わりに
