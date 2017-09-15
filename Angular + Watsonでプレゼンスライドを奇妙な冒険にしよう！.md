@@ -386,7 +386,7 @@ export class AppComponent {
 
 ### 6 Watson Speech to Textのコンポーネントを作る
 
-app.module.tsの設定は、このプロジェクトを作成する上で必須なので、app.module.tsをコピーして設定してください。
+Service、Component、Module等を追加する際にapp.module.tsの設定は必須です。app.module.tsのうち、チュートリアルの過程で新しくAngularクラスを作成した場合は、その都度必要な設定をコピーして設定してください。
 
 ### 3.1 Watson Speech to Textを利用する準備
 
@@ -570,7 +570,7 @@ recognizeMicrophoneはwatson-speechというnpmパッケージに入っている
 </div>
 ```
 
-これでボタンが表示されるようになるので、以下のようにブラウザのdevtoolsを開いて動作確認します。マイクをONにして、コンソール上に文字列が流れてきたら動作確認完了です。これで、アクセストークンを受け取って、Watsonに接続し、音声データをテキストに変換することができたことになります。
+これでボタンが表示されるようになるので、以下のようにブラウザのdevtoolsを開いて動作確認します。マイクをONにして、コンソール上に文字列が流れてきたら動作確認完了です。これで、アクセストークンを受け取って、Watsonに接続し、音声データをテキストに変換することができました。
 
 #### 5.1.3 スライドを作るための準備
 
@@ -826,53 +826,100 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 ```
 で使用することが出来るようになります。
 
-
-
-
 ### 4.3 受け取ったデータを元にエフェクトをつける
 
-Watson Speech to Textから返ってきた文字列を元にスライドにエフェクトを付けていきましょう。
-`transcript`に入る文字列は話し方によりますが1単語~数十文字までの文字数となります。
-`transcript`からエフェクトを作る関数を作成します。今回は一番シンプルな手法としてclassをセットしcssで透過画像を表示します。
+Watson Speech to Textから返ってきた文字列を元にスライドにエフェクトを付けていきます。ある特定の文字列がWatsonからのレスポンスに含まれていたら、app.component.htmlの背景にCSSやCanvasでアニメーションを設定します。SpeechTextComponentはAppComponentの子コンポーネントなので、Watsonからレスポンスを受け取ったというイベントトリガーを作成して、親コンポーネントの処理が行われるようにします。このような場合、サービス内でイベントバスを作成してDIされたクラス間のイベントを相互に管理すると実装がシンプルになります。よって以下のように、effect-provider-bus.service.tsを作成します。
 
 ```ts
-//speech-text.component.ts
-      if (data.final) {
-        const transcript = data.alternatives[0].transcript
-        this.checkEffectedWord(transcript);
-      }
-```
+import {Injectable, EventEmitter} from '@angular/core';
 
-画像を表示するためのclassをセットします。CSSを自由に編集してフェードやいろいろなアニメーションを試してみましょう。
+@Injectable()
+export class EffectProviderBusService {
+  public effectEvent$: EventEmitter<any>;
 
-```ts
-//speech-text.component.ts
-private keywords = [
-  {keyword: '徐々に', class: 'jojoni'},
-  {keyword: '倍速', class: 'baisoku'},
-];
-checkEffectedWord(word) {
-  let elm = document.getElementById('slide');
-  body.className='effect-layer';
-  this.keywords.forEach(obj => {
-    if (word.match(obj.keyword)) {
-      elm.classList.add(obj.class);
-    }
-  })
+  constructor() {
+    this.effectEvent$ = new EventEmitter();
+  }
 }
 ```
 
-## 5 動作確認
+speech-text.component.tsのwatsonからのレスポンスを受け取った時に、effectEvent$をemitすることで、このイベント処理をsubsclibeで設定しているコンポーネントのコールバックが実行されます。まずは、speech-text.component.tsにレスポンスチェックとイベントをemitするコードを追加します。
 
-それではここまで作成したものを画面で確認してみましょう。
+```ts
 
-![ezgif-2-9bf14ca8ac.gif](https://qiita-image-store.s3.amazonaws.com/0/21849/07f6e0f2-58aa-3faf-f801-eaf37f22a356.gif "ezgif-2-9bf14ca8ac.gif")
+constructor(private http: HttpClient,
+     private detector: ChangeDetectorRef,
+     private _effectService: EffectProviderBusService
+) {}
 
-スライドの移動は左右キーで行います。
-3枚目のスライド表示中にで「徐々に」というキーワードを発声します。
+private keywords = {
+  '徐々に' : 'jojoni',
+};
 
-すると`jojoni`というclassが付与され奇妙な冒険風の画像が表示されます。これで声に反応しスライドを装飾するアプリケーションの完成です。
-画像やキーワード, cssアニメーションを変えてオリジナルのスライドを作ってみましょう。
+checkEffectedWord(word) {
+  for (const _keyword in this.keywords ) {
+  if (word.match(_keyword)) {
+    this._effectService.effectEvent$.emit(this.keywords[_keyword]);
+  }
+}
+```
+
+constructorにはEffectProviderBusServiceのDIを追加することで、どのコンポーネントでも共通のeffectEvent$にアクセスできるようになります。次にapp.component.tsでsubscribeの設定をします。
+
+```ts
+import { Component, OnInit } from '@angular/core';
+//...//
+bgEffect;
+constructor(
+  private route: ActivatedRoute,
+  private location: Location,
+  private _effectService: EffectProviderBusService,
+  private ref: ChangeDetectorRef
+) {
+  this.bgEffect = '';
+}
+
+ngOnInit(): void {
+this._effectService.effectEvent$.concatMap((className) => {
+  return this.animate( className );
+}).subscribe( ( className ) => {
+  this.canvasEffect = '';
+  this.bgEffect = '';
+  this.ref.detectChanges();
+}
+
+animate( className ) {
+  this.bgEffect = className;
+  this.ref.detectChanges();
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, 5000);
+  });
+}
+```
+
+bgEffectの値をclass値にbindingすることで、bgEffectの値によって、異なるEffectが出るようにします。ここでは、jojoniという値になっていた場合、背景に透過画像を設定します。ここでは５秒間エフェクトが持続するようにしています。bgEffectをバインディングしたテンプレートは以下のようになります。
+
+
+```html
+<div id="bg" [ngClass]="bgEffect">
+</div>
+<div id="slide" class="container">
+  <app-slides></app-slides>
+  <app-speech-text></app-speech-text>
+</div>
+```
+
+これで、bgEffectの値によって、背景のエフェクトが変わる処理が実装できました。実際にボタンを押して、徐々にという言葉を録音してみましょう。上手くいくと以下のようにアニメーションが走ります。
+
+
+以上で、このチュートリアルは終了になります。
+
+#### おまけ
+
+ソースコードには、Canvasで、「ありがとう」という言葉が認識されると、花火が打ち上がるコードを収録しています。Canvas利用
+
+
+
 
 ## 6 終わりに
 

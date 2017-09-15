@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
 import * as recognizeMicrophone from 'watson-speech/speech-to-text/recognize-microphone';
 import { HttpClient } from '@angular/common/http';
 import { EffectProviderBusService } from '../effect-provider-bus.service'
@@ -19,7 +19,6 @@ export class SpeechTextComponent implements OnInit {
     };
 
   constructor(private http: HttpClient,
-     private detector: ChangeDetectorRef,
      private _effectService: EffectProviderBusService
   ) {
   }
