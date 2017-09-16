@@ -317,7 +317,6 @@ import { SlidesComponent } from './slides/slides.component';
 import { SpeechTextComponent } from './speech-text/speech-text.component';
 import { SlidesService } from './slides/slides.service';
 import { SlideComponent  } from './slides/slide/slide.component';
-import { SlideBusService } from './slides/slide-bus.service'
 import { EffectProviderBusService } from './effect-provider-bus.service'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
@@ -347,7 +346,7 @@ const appRoutes: Routes = [
     )
   ],
   exports: [ RouterModule ],
-  providers: [SlidesService, SlideBusService, SlidesService, EffectProviderBusService],
+  providers: [SlidesService,SlidesService, EffectProviderBusService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
@@ -662,7 +661,6 @@ src/app/slides
 │       ├── 1.html
 │       ├── 2.html
 │       └── 3.html
-├── slide-bus.service.ts
 ├── slides.component.css
 ├── slides.component.html
 ├── slides.component.ts
@@ -689,7 +687,6 @@ import {
   OnInit
 } from '@angular/core';
 import {trigger, animate, style, transition, animateChild, group, query, stagger} from '@angular/animations';
-import {SlideBusService} from './slide-bus.service';
 import {SlidesService} from './slides.service';
 import {SlideComponent} from './slide/slide.component';
 
@@ -705,7 +702,7 @@ export class SlidesComponent implements OnInit {
   currentIndex = 0;
   selectedSlide = null;
 
-  constructor(private _slideBusService: SlideBusService,
+  constructor(
               private _slideService: SlidesService,
             ) {
     this.slides = this._slideService.getAll();
@@ -789,50 +786,62 @@ export const SLIDES = [
 ]
 ```
 
-ここで、slide/template/1.html、2.html、3.htmlは任意のHTMLを設定できるので、好きなように設定します。
+ここで、slide/template/1.html、2.html、3.htmlは任意のHTMLを設定できるので、好きなように設定します。今回
 
-イベントバスはイベントをどのように制御するかを規定・管理するクラスのことを指します。イベントバスは-busという名前のファイルで定義することが多いです。ここではコンポーネントから送られてくるコールバックを保存しておき、イベントが発火したら全てのコンポーネントにイベントが伝搬するようにクラスを作成しています。以下の例では,新たに子コンポーネントが開かれた場合のイベント処理をnotifyOpenで定義し,いずれの子コンポーネントにも初期化時に行われるonOtherSlideOpenというイベントを設定します。
-
-
-```ts
-//slide-bus.service.ts
-import { Injectable } from '@angular/core';
-import {SlidesService} from './slides.service';
-
-@Injectable()
-export class SlideBusService {
-  private _callbacks = new Map<any, () => any>();
-
-  constructor(private _slides: SlidesService) { }
-
-  onOtherSlideOpen(previewComponent: any, cb: () => any) {
-    this._callbacks.set(previewComponent, cb);
-  }
-
-  notifyOpen(previewComponent: any) {
-    Promise.resolve().then(() => {
-      this._callbacks.forEach((cb, cmp) => {
-        if (previewComponent !== cmp) {
-          cb();
-        }
-      });
-    });
-  }
-}
+```
+<header>
+  <h1>1枚目のスライドのタイトル</h1>
+</header>
+<p>これは1枚目のスライド</p>
+<p>古写本は題名の記されていないものも多く、<br>記されている場合であっても内容はさまざまである。</p>
 
 ```
 
-slide.component.tsにスライドの実態となるSlideComponentを作成します。htmlというパラメータを設定することで,任意のDOMをAngularコンポーネントに渡せるようにしています。Angular Animationsに関しては詳細を割愛します。詳しくは,[公式のドキュメント](https://angular.io/guide/animations)を参照してください。
+
+```
+<header>
+  <h1>２枚目のスライド</h1>
+</header>
+<p>源氏物語のスライド</p>
+<ul>
+  <li>正編前紀: 桐壺から朝顔</li>
+  <li>正編中紀: 少女から藤裏</li>
+  <li>正編後紀: 若菜から竹河</li>
+</ul>
+
+```
+
+```
+<header>
+  <h1>3枚目のスライド</h1>
+</header>
+<p>これは3枚目のスライド</p>
+<table border="1px" align=center>
+  <tr>
+    <td>動物</td><td>魚</td>
+  </tr>
+  <tr>
+    <td>犬</td><td>チヌ</td>
+  </tr>
+  <tr>
+    <td>うさぎ</td><td>うなぎ</td>
+  </tr>
+</table>
+```
+という感じでかなり自由なファイルを３つ作りました。
+
+
+次に、slide.component.tsにスライドの実態となるSlideComponentを作成します。htmlというパラメータを設定することで,任意のDOMをAngularコンポーネントに渡せるようにしています。Angular Animationsに関しては詳細を割愛します。詳しくは,[公式のドキュメント](https://angular.io/guide/animations)を参照してください。
 
 ```ts
 //slide.component.ts
 import {HostBinding, Component, Input, Output, EventEmitter} from '@angular/core';
 import {trigger, animate, style, transition, animateChild, query} from '@angular/animations';
-import {SlideBusService} from '../slide-bus.service';
 
 @Component({
   selector: 'app-slide',
   templateUrl: './slide.component.html',
+  styleUrls: ['./slide.component.css'],
   animations: [
     trigger('nextAnimation', [
       transition(':enter', [
@@ -847,18 +856,7 @@ import {SlideBusService} from '../slide-bus.service';
 
 export class SlideComponent {
   @Input() html;
-  @Output('close')
-  public closeNotify = new EventEmitter();
-
   @HostBinding('@nextAnimation') next = false;
-
-  constructor(private _slideService: SlideBusService) {
-    _slideService.onOtherSlideOpen(this, () => this.close());
-  }
-
-  close() {
-    this.closeNotify.emit();
-  }
 }
 
 ```
@@ -870,12 +868,11 @@ export class SlideComponent {
 以上でスライド関連のコンポーネントの実装は終わりになります。その後app.module.tsなどのmodule管理に,
 
 ```ts
-//app.module.ts等
+//app.module.ts
 
 import { SlidesComponent } from './slides/slides.component';
 import { SlidesService } from './slides/slides.service';
 import { SlideComponent  } from './slides/slide/slide.component';
-import { SlideBusService } from './slides/slide-bus.service'
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 //<中略>
@@ -890,15 +887,17 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
      ...<中略>
     BrowserAnimationsModule,
   ],
-  providers: [SlidesService, SlideBusService, SlidesService],
+  providers: [SlidesService, SlidesService],
 })
 ```
 
 の設定を追記し,Routesや
+
 ```
 <app-slides></app-slides>
 ```
-で使用することが出来るようになります。app.component.htmlを以下のように設定しましょう。
+
+で使用することが出来るようになります。app.component.htmlと関連するcssを以下のように設定しましょう。
 
 ```
 <div class="container">
@@ -906,6 +905,64 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
   <app-slides></app-slides>
 </div>
 ```
+
+```css
+//app.component.css
+  .container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+```
+
+```css
+//slides.component.css
+  :host {
+    position:relative;
+    height:inherit;
+    overflow:hidden;
+    display:block;
+    height: 100%;
+    width: 100%;
+  }
+
+  div.page {
+    text-align: center;
+    font-size: 24px;
+  }
+  div.page p  {
+    text-align: left;
+  }
+
+```
+
+
+```css
+//slide.component.css
+:host {
+  position:relative;
+  height:inherit;
+  overflow:hidden;
+  display:block;
+  height: 100%;
+  width: 100%;
+  top: 20%;
+}
+
+div.page {
+  text-align: center;
+  font-size: 24px;
+}
+div.page p  {
+  text-align: left;
+}
+
+
+```
+
+これでスライドの動作が確認できるようになります。
+
+![jojo.gif](images/slide.gif "slide-gif")
 
 ブラウザで確認できたら、エフェクトをつける作業に入ります。
 
@@ -926,6 +983,18 @@ export class EffectProviderBusService {
 }
 ```
 
+これを使用できるように、app.module.tsにも設定を加えます。
+
+
+```ts
+import {EffectProviderBusService} from './effect-provider-bus.service';
+
+providers: [
+    //・・・
+    EffectProviderBusService
+]
+```
+
 speech-text.component.tsのwatsonからのレスポンスを受け取った時に、effectEvent$をemitすることで、このイベント処理をsubsclibeで設定しているコンポーネントのコールバックが実行されます。まずは、speech-text.component.tsにレスポンスチェックとイベントをemitするコードを追加します。
 
 ```ts
@@ -940,10 +1009,29 @@ private keywords = {
   '徐々に' : 'jojoni',
 };
 
+startRecognizeStream(token) {
+  const stream = recognizeMicrophone({
+    token,
+    model: 'ja-JP_BroadbandModel',
+    objectMode: true,
+    extractResults: true,
+    keywords: Object.keys(this.keywords),
+    keywords_threshold: 0.7,
+  });
+  stream.on('data', data => {
+    if (data.final) {
+      const transcript = data.alternatives[0].transcript;
+      this.checkEffectedWord(transcript);
+    }
+  });
+  this.recognizeStream = stream
+}
+
 checkEffectedWord(word) {
   for (const _keyword in this.keywords ) {
-  if (word.match(_keyword)) {
-    this._effectService.effectEvent$.emit(this.keywords[_keyword]);
+    if (word.match(_keyword)) {
+      this._effectService.effectEvent$.emit(this.keywords[_keyword]);
+    }
   }
 }
 ```
@@ -952,11 +1040,14 @@ constructorにはEffectProviderBusServiceのDIを追加することで、どの�
 
 ```ts
 import { Component, OnInit } from '@angular/core';
+import {EffectProviderBusService} from './effect-provider-bus.service';
+import 'rxjs/add/operator/concatMap'
+import { ChangeDetectorRef } from '@angular/core'
+
+export class AppComponent implements OnInit {
 //...//
 bgEffect;
 constructor(
-  private route: ActivatedRoute,
-  private location: Location,
   private _effectService: EffectProviderBusService,
   private ref: ChangeDetectorRef
 ) {
@@ -964,12 +1055,12 @@ constructor(
 }
 
 ngOnInit(): void {
-this._effectService.effectEvent$.concatMap((className) => {
-  return this.animate( className );
-}).subscribe( ( className ) => {
-  this.canvasEffect = '';
-  this.bgEffect = '';
-  this.ref.detectChanges();
+  this._effectService.effectEvent$.concatMap((className) => {
+    return this.animate( className );
+  }).subscribe( ( className ) => {
+    this.bgEffect = '';
+    this.ref.detectChanges();
+  });
 }
 
 animate( className ) {
@@ -1022,8 +1113,8 @@ bgEffectの値がjojoniの値になった時に設定するCSSは以下のよう
   }
 ```
 
-
-これで、bgEffectの値によって、背景のエフェクトが変わる処理が実装できました。実際にボタンを押して、徐々にという言葉を録音してみましょう。上手くいくと以下のようにアニメーションが走ります。
+更にGithubにあるjojoni.pngをapp/src/assets/jojoni.pngに配置しておきます。これで、bgEffectの値によって、背景のエフェクトが変わる処理が実装できました。
+実際にボタンを押して、徐々にという言葉を録音してみましょう。上手くいくと以下のようにアニメーションが走ります。
 
 ![jojo.gif](images/jojo.gif "jojo.gif")
 
@@ -1039,9 +1130,7 @@ app.get('/', function(req, res, next) {
 ```
 を足します。これによって、/でindex.htmlにアクセスできるようになります。deployする場合は、ng buildを実行してからデプロイを行います。うまくデプロイができてれば、Blumixのホストからコンテンツが見られるようになります。
 
-
-
-
+![jojoni-host.png](images/jojoni-host.png "jojoni-host.png")
 
 以上で、このチュートリアルは終了になります。
 
