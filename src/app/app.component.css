@@ -1,0 +1,59 @@
+  .container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  .jojoni {
+    width: 100%;
+    height: 100%;
+    background: url("/assets/jojoni.png");
+    position: absolute;
+    background-size: 100% auto;
+    opacity: 1;
+    animation: jojolike .1s infinite;
+  }
+  .spark,.wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* 背景グラデーションの作成 */
+    background: linear-gradient(to bottom,
+    hsla(116, 75%, 48%, 0.76),
+    hsl(240, 80%, 60%),
+    hsl(359, 93%, 48%));
+    background-size: 400% 400%;
+    animation: grad 10s ease infinite;
+    mix-blend-mode: hard-light;
+  }
+
+  .canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+   }
+
+  .kaizoku {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background: url("/app/assets/kaizoku.png");
+    background-size: 100% auto;
+    opacity: 1;
+  }
+
+  @keyframes grad {
+    0% { background-position: 50% 0% }
+    50% { background-position: 50% 100%	}
+    100% { background-position: 50% 0% }
+  }
+
+  @keyframes jojolike {
+    0% {transform: translate(0px, 0px) rotateZ(0deg)}
+    25% {transform: translate(4px, 4px) rotateZ(1deg)}
+    50% {transform: translate(0px, 4px) rotateZ(0deg)}
+    75% {transform: translate(4px, 0px) rotateZ(-1deg)}
+    100% {transform: translate(0px, 0px) rotateZ(0deg)}
+  }

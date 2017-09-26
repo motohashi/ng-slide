@@ -1,5 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import * as recognizeMicrophone  from 'watson-speech/speech-to-text/recognize-microphone';
+import { Component, OnInit} from '@angular/core';
+import * as recognizeMicrophone from 'watson-speech/speech-to-text/recognize-microphone';
+import { HttpClient } from '@angular/common/http';
+import { EffectProviderBusService } from '../effect-provider-bus.service'
 
 @Component({
   selector: 'app-speech-text',
@@ -10,15 +12,22 @@ export class SpeechTextComponent implements OnInit {
 
   private isRecording = false
   private recognizeStream = null
+  private keywords = {
+      '徐々に' : 'jojoni',
+      '海賊' : 'kaizoku',
+      'ありがとう' : 'spark'
+    };
 
-  constructor(private detector:ChangeDetectorRef) { }
+  constructor(private http: HttpClient,
+     private _effectService: EffectProviderBusService
+  ) {
+  }
 
-  ngOnInit() {}
+  ngOnInit() {
+  }
 
   getTokenAsync() {
-    return fetch('http://0.0.0.0:3000/api/token')
-            .then(res => res.json() as any)
-            .then(data => data.token)
+    return this.http.get('/auth');
   }
 
   async handleMicClick() {
@@ -27,8 +36,8 @@ export class SpeechTextComponent implements OnInit {
     } else if (!this.isRecording) {
       this.isRecording = true
       await this.getTokenAsync()
-        .then(token => {
-          this.startRecognizeStream(token)
+        .subscribe(token => {
+          this.startRecognizeStream(token['token']);
         })
     }
   }
@@ -39,15 +48,15 @@ export class SpeechTextComponent implements OnInit {
       model: 'ja-JP_BroadbandModel',
       objectMode: true,
       extractResults: true,
-      keywords: ['徐々に','海賊'],
+      keywords: Object.keys(this.keywords),
       keywords_threshold: 0.7,
-    })
+    });
     stream.on('data', data => {
       if (data.final) {
-        const transcript = data.alternatives[0].transcript
+        const transcript = data.alternatives[0].transcript;
         this.checkEffectedWord(transcript);
       }
-    })
+    });
     this.recognizeStream = stream
   }
 
@@ -60,20 +69,13 @@ export class SpeechTextComponent implements OnInit {
     this.recognizeStream = null
   }
 
-
-    private keywords = [
-      {keyword: '徐々に', class: 'jojoni'},
-      {keyword: '海賊', class: 'kaizoku'},
-    ];
-    checkEffectedWord(word) {
-      let body = document.getElementById('slide');
-      body.className='effect-layer';
-                console.log(word)
-      this.keywords.forEach(obj => {
-        if (word.match(obj.keyword)) {
-
-          body.classList.add(obj.class);
-        }
-      })
+  checkEffectedWord(word) {
+    for (const _keyword in this.keywords ) {
+      if (word.match(_keyword)) {
+        console.log(_keyword)
+        this._effectService.colorEvent$.emit(this.keywords[_keyword]);
+        this._effectService.effectEvent$.emit(this.keywords[_keyword]);
+      }
     }
+  }
 }

@@ -8,7 +8,7 @@ export const SLIDES = [
     page: page1
   },
   {
-    title: 'slide1',
+    title: 'middle',
     page: page2
   },
   {
