@@ -1,10 +1,10 @@
-import { NgSlidesPage } from './app.po';
+import { DemoPage } from './app.po';
 
-describe('ng-slides App', () => {
-  let page: NgSlidesPage;
+describe('demo App', () => {
+  let page: DemoPage;
 
   beforeEach(() => {
-    page = new NgSlidesPage();
+    page = new DemoPage();
   });
 
   it('should display welcome message', () => {

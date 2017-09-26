@@ -1,15 +1,10 @@
 import {
-  HostBinding,
   HostListener,
   Component,
   Input,
-  Output,
-  OnInit,
-  ViewChild,
-  ComponentFactoryResolver
+  OnInit
 } from '@angular/core';
 import {trigger, animate, style, transition, animateChild, group, query, stagger} from '@angular/animations';
-import {SlideBusService} from './slide-bus.service';
 import {SlidesService} from './slides.service';
 import {SlideComponent} from './slide/slide.component';
 
@@ -18,25 +13,21 @@ import {SlideComponent} from './slide/slide.component';
   templateUrl: './slides.component.html',
   styleUrls: ['./slides.component.css'],
 })
+
 export class SlidesComponent implements OnInit {
 
-@Input() public slides;
-
-  selectedSlide = 0;
+  @Input() public slides;
   currentIndex = 0;
+  selectedSlide = null;
 
-  constructor(private _slideBusService: SlideBusService,
+  constructor(
               private _slideService: SlidesService,
             ) {
     this.slides = this._slideService.getAll();
   }
 
   ngOnInit() {
-    this.slides = this._slideService.getAll();
     this.selectSlide(this.currentIndex);
-    this.slides.forEach((_slide_data, index) => {
-        this._slideBusService.register(index, _slide_data);
-    });
   }
 
   selectSlide(slide_id: any) {
@@ -50,17 +41,14 @@ export class SlidesComponent implements OnInit {
   @HostListener('window:keyup.arrowRight')
   onArrowRight() {
     if (this.currentIndex + 1 < this.slides.length) {
-      const slide = this._slideBusService.slidesByName[++this.currentIndex];
-      this.selectSlide(slide);
+      this.selectSlide(++this.currentIndex);
     }
-    console.log('arrowUp..');
   }
 
   @HostListener('window:keyup.arrowLeft')
   onArrowLeft() {
     if (this.currentIndex - 1 >= 0) {
-      const slide = this._slideBusService.slidesByName[--this.currentIndex];
-      this.selectSlide(slide);
+      this.selectSlide(--this.currentIndex);
     }
   }
 }

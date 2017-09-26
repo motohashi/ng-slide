@@ -1,7 +1,7 @@
 applications:
 - path: .
-  name: ng-slide 
+  name: ng-slide
   memory: 512M
   instances: 1
-  domain: mybluemix.net 
+  domain: mybluemix.net
   disk_quota: 1024M

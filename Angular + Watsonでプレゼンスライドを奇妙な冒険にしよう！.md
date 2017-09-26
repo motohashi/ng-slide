@@ -1,13 +1,13 @@
 今話題の技術や最新技術への挑戦を応援する【IBM×teratailのコラボ企画】第二弾です。3回に渡って話題の技術とWatson APIをかけ合わせた開発サンプルをご紹介していきます。記事を読み進めながら、ぜひみなさんも手を動かして作ってみてください。
-　第二弾は、今人気を博しているAngularを使用したオリジナルプレゼンテーションを作成するためのサンプルをご紹介いたします。
+　第三弾は、今人気を博しているAngularを使用したオリジナルプレゼンテーションを作成するためのサンプルをご紹介いたします。
 
 ## 1. Angularでオリジナルのプレゼンスライドを作ろう
-こんにちは。勉強会などで登壇しているときのスライドがありきたりで個性が埋没し,自分が八百屋の店先に山のように並んだ大根の一本であるかのような気持ちになったことはありませんか。私はUSBが一発で入らない確率と同じぐらいあります。
+こんにちは。勉強会などで登壇しているときのスライドがありきたりで個性が埋没し、自分が八百屋の店先に山のように並んだ大根の一本であるかのような気持ちになったことはありませんか。私はUSBが一発で入らない確率と同じぐらいあります。
 
 この記事ではいま試してみたい技術であるJavaScriptのWebアプリケーションフレームワーク[Angular]を使ったプレゼンテーションで利用するスライドを作成します。
-プレゼンテーションのスライドはパワーポイントやkeynoteで作成されることが多いですが,最近はWeb上のGUIで作成されるものやHTML+JavaScriptで作成するものなど様々なものが存在します。
-パワーポイントやkeynoteと違いブラウザ上で実行されるため発表用の端末に左右されず, `github.io`などのWebサーバーに公開すればどこからでもアクセスできるため重宝されています。
-しかし,そういったブラウザ上で実行される多くのスライドサービスは既存のアプリケーションと違いリッチなアニメーションをつけることを不得手としています。
+プレゼンテーションのスライドはパワーポイントやkeynoteで作成されることが多いですが、最近はWeb上のGUIで作成されるものやHTML+JavaScriptで作成するものなど様々なものが存在します。
+パワーポイントやkeynoteと違いブラウザ上で実行されるため発表用の端末に左右されず、 `github.io`などのWebサーバーに公開すればどこからでもアクセスできるため重宝されています。
+しかし、そういったブラウザ上で実行される多くのスライドサービスは既存のアプリケーションと違いリッチなアニメーションをつけることを不得手としています。
 なので今回はプレゼンテーションをする際にほぼ必ず発生する発表者の「声」に反応しスライド上にエフェクトを表示してみようと思います。
 今回利用するIBM BluemixのSpeech To Textでシンプルになりがちなスライドにエフェクトを付けてあなたも唯一無二スタイルを実現しましょう。
 
@@ -18,7 +18,7 @@
 - 認証サーバー: typescript + node.js
 - 音声認識: Watson Speech to Text
 
-IBM Watsonアカウントへの登録を事前に行ってください。また,今回のサンプルアプリケーションは以下の開発環境で作成しています。
+IBM Watsonアカウントへの登録を事前に行ってください。また、今回のサンプルアプリケーションは以下の開発環境で作成しています。
 
   |環境情報|バージョン|備考|
   |--|--|--|
@@ -27,33 +27,35 @@ IBM Watsonアカウントへの登録を事前に行ってください。また,
   |npm|v5.3.0||
   |angular-cli|v1.2.0|サンプルコードをcloneした場合はインストール不要|
 
-その他使用しているライブラリの情報はpackage.jsonに記載しています。また,[angular-cli](https://github.com/angular/angular-cli)を使用しています。
+その他使用しているライブラリの情報はpackage.jsonに記載しています。また、[angular-cli](https://github.com/angular/angular-cli)を使用しています。
 
 ### 2.1 構成
 
-構成の実装は三段階に分かれます。第一段階ではWatson Speech To Textをユーザーが使用出来るようにするために、ExpressにAPIを用意して、WatsonのAPIトークンを発行できるようにしてWEBアプリケーションとして公開できるようにします。第二段階では、ブラウザからそのアクセストークンを使って、Watsonにアクセスして音声認識が出来るようにします。第三段階では、スライドプレゼン用のアプリケーションを作成し、実際のプレゼンで使われそうな言葉を認識させて、面白いエフェクトが出せるようにします。なお、先に完成物が気になった方は[こちら](https://github.com/motohashi/ng-slide)を御覧ください。デモは以下のようになります。
+今回は以下のようにAngularでスライドアプリケーションを作ります。
+
+![slide.gif](images/slide.gif "slide-gif")
+
+更にそこにWatsonAPIを組み合わせ、音声に合わせて漫画のようなエフェクトがスライドに入るようにします。
 
 ![jojo.gif](images/jojo.gif "jojo-gif")
 
-![jojo.gif](images/slide.gif "slide-gif")
+構成の実装は三段階に分かれます。第一段階ではWatson Speech To Textをユーザーが使用出来るようにするために、ExpressにAPIを用意して、WatsonのAPIトークンを発行できるようにしてWEBアプリケーションとして公開できるようにします。第二段階では、ブラウザからそのアクセストークンを使って、Watsonにアクセスして音声認識が出来るようにします。第三段階では、スライドプレゼン用のアプリケーションを作成し、実際のプレゼンで使われそうな言葉を認識させて、面白いエフェクトが出せるようにします。なお、先に完成物が気になった方は[こちら](https://github.com/motohashi/ng-slide)を御覧ください。
 
 ### 2.2 Watson Speech to Text
 Watson Speech to Textは文法や日本語に標準対応した音声の文字書き起こしサービスです。音をそのまま書き起こすのではなく文法や辞書を加味し書き起こすため正確な書き起こしが実現できます。
 
 詳しくはこちらの[公式ページ](https://www.ibm.com/watson/jp-ja/developercloud/speech-to-text.html)を参照して下さい。
 
-### 3 アプリケーション用のプロジェクトを作成する
-
-#### Angularプロジェクトを作成する
+## 3. Angularプロジェクトを作成する
 
 Angularのプロジェクトはangular-cliを使用することで簡単に作成することができます。
-新規のプロジェクトから作成を始める場合は,所定のバージョンのangular-cliを`npm install -g @angular/cli`でグローバルインストールし,ターミナルなどのコンソールで以下のコマンドを入力します。
+新規のプロジェクトから作成を始める場合は、所定のバージョンのangular-cliを`npm install -g @angular/cli`でグローバルインストールし、ターミナルなどのコンソールで以下のコマンドを入力します。
 
 ```shell
 ng new ${project} または、 ローカルディレクトリのnode_modulesのangular-cliを使用する場合は、$(npm bin)/ng new ${project}
 ```
 
-上の${project}に任意のプロジェクト名を入れるとプロジェクト名のディレクトリが作成され,配下にプロジェクトのひな型が作成されます。ng new projectで作成したプロジェクトのファイル階層は以下のようになります。（yarnを使用している場合や、バージョンの違いによって多少異なる可能性があります。）
+上の${project}に任意のプロジェクト名を入れるとプロジェクト名のディレクトリが作成され、配下にプロジェクトのひな型が作成されます。ng new projectで作成したプロジェクトのファイル階層は以下のようになります。（yarnを使用している場合や、バージョンの違いによって多少異なる可能性があります。）
 
 ```
 project
@@ -72,7 +74,7 @@ project
 └── tslint.json
 ```
 
-この状態で,プロジェクト配下に移動し,ng serveあるいは,npm startを実行すると,angular-cli内部で設定されているwebpack-devserverが起動し,ひな型のWEBアプリケーションが起動します。webpackの設定は通常angular-cliのnode_modulesの中に隠蔽されているため,ngコマンドを使っている限り設定を変更することができませんが,webpackの設定を柔軟に行いたい場合などにおいて
+この状態で、プロジェクト配下に移動し、ng serveあるいは、npm startを実行すると、angular-cli内部で設定されているwebpack-devserverが起動し、ひな型のWEBアプリケーションが起動します。webpackの設定は通常angular-cliのnode_modulesの中に隠蔽されているため、ngコマンドを使っている限り設定を変更することができませんが、webpackの設定を柔軟に行いたい場合などにおいて
 
 ```shell
 ng eject
@@ -86,9 +88,28 @@ npm install
 
 を実行して、必要なパッケージをインストールしておきます。
 
-### 4.2 認証用APIを作成する
+## 4. 認証用APIを作成する
 
-### 4.2.1 認証用APIのエンドポイントを設定する
+### 4.1 Watson Speech To Text用の認証情報を取得する
+
+まずサービス用の認証情報を作成します。 [Bluemixコンソール](https://console.bluemix.net)の左上メニューよりWatsonサービスを選択します。
+
+![watson-catalog.png](images/watson-catalog.png "watson-catalog.png")
+
+Watsonサービスの作成を押下後のリストよりSpeech To Textを選択します。
+
+ここでアプリ名は`sample-stt-application`など判別できる名前をつけてください。
+
+サービス資格情報から先ほど作成した資格情報のアクション[資格情報の表示]を選択すると以下のような画面が表示されます。
+
+
+![credentail.png](images/credential.png "credential.png")
+
+
+このjsonデータは後ほどcredentail.jsonというファイルに書き写します。これで準備完了です。
+
+
+### 4.2 認証用APIのエンドポイントを設定する
 
 AngularプロジェクトはTypeScriptでの開発が主流であるため、ここでは、認証用APIのモジュールはTypeScriptで作ることにします。また、ExpressサーバーはES6で書くことにします。これは、tsconfig.jsonの設定をすることで、ESモジュールを読み込めるようにすることで、TypescriptとESどちらも読み込めるようになります。ここでは、Typescriptを実行できる環境としてts-nodeとtypescirptをインストールします。加えてExpressもインストールしておきましょう。body-parserはexpressのテンプレートエンジン拡張用のプラグインです。(最新版のangular-cliでは、ts-node、typescriptはpacakge.jsonに最初から入っていますのであればインストールは不要です。)
 
@@ -108,10 +129,10 @@ const port =  process.env.PORT || 3000;
 const watsonAuthService = require('./watson-auth-service');
 
 app.use(function(req, res, next) {
-    res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTION');
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTION');
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
 });
 
 app.use(bodyParser());
@@ -129,7 +150,7 @@ app.get('/auth', function(req, res, next) {
 ```
 ここで、httpモジュールはnodeの標準ライブラリになります。staticは、server/index.jsからexpress.staticはtemplateやjsに対するパスを解決して呼び出せるようにします。ここでは、Angularアプリケーションのbuild済みのファイルは全てdistディレクトリに配置されるため、distディレクトリを指定しておき、後ほどindex.htmlを読み込めるようにします。 watsonAuthServiceはエンドポイント/authにGETメソッドでリクエストが送られた際にWatsonのアクセストークンを取得できるようにするモジュールで後ほど実装します。これで最低限のserverの準備が出来ました。次に上述のwatsonAuthServiceを実装します。
 
-### 4.2.2 認証用APIを実装する
+### 4.3 認証用APIを実装する
 
 serverディレクトリに、watson-auth-service.tsを作成し、実装します。ここで、実装に入る前にwatson-developer-cloudモジュールをインストールしておきます。
 
@@ -163,7 +184,7 @@ export function getAuthToken(): Promise<string> {
 ```
 
 以上のファイルは、serverディレクトリの中にあるcredential.jsonというファイルからjson形式で、Watsonのアカウント情報を取得し、watson-developer-cloudモジュールにセットするようにしています。
-そして、その認証情報を使用し、ユーザーにアクセストークンを取得させる処理を作成しています。よって、3.1節の画像にある、url、username、passwordを記述したcredential.jsonというファイルをserverディレクトリ配下に作成します。
+そして、その認証情報を使用し、ユーザーにアクセストークンを取得させる処理を作成しています。よって、4.1節の画像にある、url、username、passwordを記述したcredential.jsonというファイルをserverディレクトリ配下に作成します。
 
 ```json
 {
@@ -175,7 +196,7 @@ export function getAuthToken(): Promise<string> {
 
 これでcredential.jsonを作成できました。次に、Bluemix上のSpeech To Textを使用するためのアクセストークンが、ローカルサーバを起動して取得できるか確かめてみます。
 
-### 4.2.3 アクセストークンをローカルサーバを経由して取得する
+### 4.4 アクセストークンをローカルサーバを経由して取得する
 
 node.jsの実行環境ではカレントディレクトリにあるnode_modules内のnpmパッケージの実行ファイルのパスは`npm bin`というコマンドで取得できるようになっています。そのことを利用してnpmパッケージをグローバルインストールしなくても、以下のようにカレントディレクトリ内にローカルインストールされたのnpmパッケージの実行ファイルを実行する事ができます。以下の例では、ローカルインストールされたts-nodeを利用してserverを起動します。serverディレクトリ内にindex.jsを配置しているため、呼び出されるファイルはindex.jsになります。
 
@@ -189,14 +210,14 @@ $(npm bin)/ts-node server
 
 無事アクセストークンを取得することが出来たら、今度は、Bluemix上にExpressサーバをデプロイしてみましょう。
 
-### 4.3 Bluemix上のCloudFoundryにnode.jsアプリケーションをデプロイする
+### 4.5 Bluemix上のCloudFoundryにnode.jsアプリケーションをデプロイする
 
-### 4.3.1 Bluemix CLIをインストールする
+### 4.5.1 Bluemix CLIをインストールする
 [こちらのリンク](https://console.bluemix.net/docs/cli/reference/bluemix_cli/all_versions.html#bluemix-cli-)からBlumix CLIをインストールすることが出来ます。
 
 ＊ Cloud Foundry CLIのみを使ってデプロイすることも可能です。Bluemix CLIにはCloud Foundry CLIが内蔵されているため、どちらを使用しても構いません。ここでは、Bluemix CLIのコマンドを利用して、デプロイを行います。
 
-### 4.3.2 Cloud Foundryへのデプロイ設定を行う
+### 4.5.2 Cloud Foundryへのデプロイ設定を行う
 
 node.jsアプリケーションをデプロイするのは、とても簡単です。.cfignoreファイルにデプロイに不必要なファイル、ディレクトリを記述しておくと、デプロイ時に除外されるため、必要なファイルのみをデプロイする事ができます。また、node.jsのフロントエンド側のスクリプトは全てビルド済みのファイルだけデプロイすれば良いため、ビルド前のスクリプトや本番環境で使われないファイルやnode_modulesなどはデプロイから外しておくことで、デプロイ時間を短縮できます。それらを踏まえた上で、.cfignoreの内容は以下のようになります。
 
@@ -258,7 +279,7 @@ pathはmanifest.ymlのパスを基準にディレクトリを指定します。n
 NODE_ENV=production PORT=8080 ts-node server
 ```
 
-### 4.3.4 Cloud Foundryにデプロイを行う
+### 4.5.3 Cloud Foundryにデプロイを行う
 
 Cloud Foundryの管理画面に戻ると、デプロイ前のプロジェクトへのインストラクションがあります。はじめて、bluemixコマンドを利用する場合は、このインストラクションに従って、今まで利用したことがあり、ログイン情報の登録などが住んでいる場合は、好きな方法で設定しても構いません。
 
@@ -284,102 +305,92 @@ bluemix app push ng-slide
 
 ## 5.1 Angularの基礎知識
 
-####　5.1.1 Angularプロジェクトの基本構成
+###　5.1.1 Angularプロジェクトの基本構成
 
-angular-cliを利用する場合,.angular-cli.jsonにbuildの設定が書き出されています。ここで,重要なのは,以下の設定です。
+angular-cliを利用する場合、.angular-cli.jsonにbuildの設定が書き出されています。ここで、重要なのは、以下の設定です。
 
 ```json
       "index": "index.html",
       "main": "main.ts",
 ```
 
-この設定は,main.tsの設定に従いテンプレートとしてのindex.htmlの中に設定されている後述のAngularのコンポーネントをコンパイルしていき,最終的にDOMレンダリングされたindex.htmlを生成する設定になります。この設定はindex.html上にAngularを含む最終的にビルドされてバンドルされたjsをscriptタグで発火させるコードが記述されています。
+この設定は、main.tsの設定に従いテンプレートとしてのindex.htmlの中に設定されている後述のAngularのコンポーネントをコンパイルしていき、最終的にDOMレンダリングされたindex.htmlを生成する設定になります。この設定はindex.html上にAngularを含む最終的にビルドされてバンドルされたjsをscriptタグで発火させるコードが記述されています。
 
 ```ts
 //main.ts
 platformBrowserDynamic().bootstrapModule(AppModule);
 ```
 
-AppModuleは,Angularのモジュールです。Angularのモジュールは後述するように定義されているコンポーネントやその中で使われているモジュール等をindex.htmlや他のモジュール内で使用できるように定義する,いわば設定ファイルのような役割をします。
+AppModuleは、Angularのモジュールです。Angularのモジュールは後述するように定義されているコンポーネントやその中で使われているモジュール等をindex.htmlや他のモジュール内で使用できるように定義する、いわば設定ファイルのような役割をします。
 
-#### 5.1.2 Angularのモジュールの構成
+### 5.1.2 Angularのモジュールの構成
 
 ```ts
 //app.module.ts
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Routes } from '@angular/router';
-import { AppComponent } from './app.component';
-import { SlidesComponent } from './slides/slides.component';
-import { SpeechTextComponent } from './speech-text/speech-text.component';
-import { SlidesService } from './slides/slides.service';
-import { SlideComponent  } from './slides/slide/slide.component';
-import { EffectProviderBusService } from './effect-provider-bus.service'
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 
-const appRoutes: Routes = [
-  { path: 'slides', component: SlidesComponent },
-  { path: '',      component: AppComponent },
-];
+import { AppComponent } from './app.component';
+import { SpeechTextComponent } from './speech-text/speech-text.component';
+import { SlidesComponent } from './slides/slides.component';
+import { SlideComponent } from './slides/slide/slide.component';
+
+import { SlidesService } from './slides/slides.service';
+import {EffectProviderBusService} from './effect-provider-bus.service';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
     AppComponent,
-    SlidesComponent,
-    SlideComponent,
     SpeechTextComponent,
+    SlidesComponent,
+    SlideComponent
   ],
   imports: [
-    CommonModule,
     BrowserModule,
-    FormsModule,
-    HttpModule,
-    HttpClientModule,
     BrowserAnimationsModule,
-    RouterModule.forRoot(
-      appRoutes,
-      { enableTracing: true }
-    )
+    HttpClientModule
   ],
-  exports: [ RouterModule ],
-  providers: [SlidesService,SlidesService, EffectProviderBusService],
+  providers: [
+    SlidesService,
+    SlidesService,
+    EffectProviderBusService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
 
+
 ```
 
-以上は本サンプルコードに使用されているapp.module.tsのソースコードになります。この例に沿って説明を行います。まず,@NgModuleはデコレータでAppModuleクラスがAngularのモジュールであることを定義するとともに,設定を渡します。@NgModuleの設定値に関しては,今回よく使われる上記の例のみを説明します。そのほかの設定値に興味がある方は公式のドキュメントをご覧ください。それぞれ指定されているコンポーネントやモジュールやサービスの詳細についてはここでは割愛します。
+以上は本サンプルコードに使用されているapp.module.tsのソースコードになります。この例に沿って説明を行います。まず、@NgModuleはデコレータでAppModuleクラスがAngularのモジュールであることを定義するとともに、設定を渡します。@NgModuleの設定値に関しては、今回よく使われる上記の例のみを説明します。そのほかの設定値に興味がある方は公式のドキュメントをご覧ください。それぞれ指定されているコンポーネントやモジュールやサービスの詳細についてはここでは割愛します。
 
 ## declarations
 
-  前述のmain.tsで呼ばれたhtmlファイル内において,declarationsで指定されているそれぞれのコンポーネントに指定されているセレクタの条件に当てはまるタグをコンパイルできるようにします。これはこのモジュール内で指定されているすべてのコンポーネントのテンプレートのタグにも有効になり,コンポーネントのセレクタの条件に当てはまるタグが階層的にコンポーネントに置き換わるようになります。また,Directiveや,Pipeを指定するとそれらをモジュールの中で指定されている全てのコンポーネント内で使用することができるようになります。
+  前述のmain.tsで呼ばれたhtmlファイル内において、declarationsで指定されているそれぞれのコンポーネントに指定されているセレクタの条件に当てはまるタグをコンパイルできるようにします。これはこのモジュール内で指定されているすべてのコンポーネントのテンプレートのタグにも有効になり、コンポーネントのセレクタの条件に当てはまるタグが階層的にコンポーネントに置き換わるようになります。また、Directiveや、Pipeを指定するとそれらをモジュールの中で指定されている全てのコンポーネント内で使用することができるようになります。
 
 ## imports
 
-  外部のAngularモジュールをインポートします。このときimportsに指定したAngularモジュール内でexportsに設定されているModule,Component,Directive,Pipe,providersに指定されているServiceを,importsした側のコンポーネントで有効にします。
+  外部のAngularモジュールをインポートします。このときimportsに指定したAngularモジュール内でexportsに設定されているModule、Component、Directive、Pipe、providersに指定されているServiceを、importsした側のコンポーネントで有効にします。
 
 ## exports
 
-  外部のAngularモジュールのimportsにモジュールが指定された時に指定されたモジュールがエクスポートする機能を選択します。exportsで指定したModule,Component,Directive,Pipeをimportsした側のコンポーネント側で使用することができるようになります。
+  外部のAngularモジュールのimportsにモジュールが指定された時に指定されたモジュールがエクスポートする機能を選択します。exportsで指定したModule、Component、Directive、Pipeをimportsした側のコンポーネント側で使用することができるようになります。
 
 ## providers
 
-  このモジュール内および,このモジュールをimportしたコンポーネント内で*Data Injection(DI)によって使用可能になるサービスクラスを登録します。サービスはデータの送信・取得などコンポーネントへのデータの渡し方や,コンポーネントのデータと連動するイベントの処理など手続き的な処理を記述するクラスの名称です。これらのサービスは対象のモジュール内で使用可能なすべてのコンポーネントにおいてつけ外しが可能になります。
+  このモジュール内および、このモジュールをimportしたコンポーネント内で*Data Injection(DI)によって使用可能になるサービスクラスを登録します。サービスはデータの送信・取得などコンポーネントへのデータの渡し方や、コンポーネントのデータと連動するイベントの処理など手続き的な処理を記述するクラスの名称です。これらのサービスは対象のモジュール内で使用可能なすべてのコンポーネントにおいてつけ外しが可能になります。
 
 ## bootstrap
 
-  コンポーネントのエントリポイントです。最初にコンパイルを開始するコンポーネントを指定します。この指定により,このモジュールが適用されている範囲が明確になります。複数のAngularアプリケーションを一つのプロジェクトで使用したい場合かつ,お互いの実装が共存できないような場合に,他のbootstrapモジュールへの干渉を防ぐためimportsの代わりに指定が必要なものです。
+  コンポーネントのエントリポイントです。最初にコンパイルを開始するコンポーネントを指定します。この指定により、このモジュールが適用されている範囲が明確になります。複数のAngularアプリケーションを一つのプロジェクトで使用したい場合かつ、お互いの実装が共存できないような場合に、他のbootstrapモジュールへの干渉を防ぐためimportsの代わりに指定が必要なものです。
 
-*Data Injection:内部変数にクラスを持つオブジェクトにおいて,その内部変数にその場でクラスのインスタンスを生成して代入するのではなく,クラスのインスタンスを関数の引数として外部から渡してその値を内部変数に代入させることで,サブクラスやインターフェース経由で継承クラスを引数の型に指定できるようにしたり,処理の手順を確定させることによって,Data Injection先のコードを一切変えずにクラスのつけ外しによる変更を容易にする実装上のテクニック。AngularにおいてはサービスをData Injectionで指定することが規約になっています。
+*Data Injection:内部変数にクラスを持つオブジェクトにおいて、その内部変数にその場でクラスのインスタンスを生成して代入するのではなく、クラスのインスタンスを関数の引数として外部から渡してその値を内部変数に代入させることで、サブクラスやインターフェース経由で継承クラスを引数の型に指定できるようにしたり、処理の手順を確定させることによって、Data Injection先のコードを一切変えずにクラスのつけ外しによる変更を容易にする実装上のテクニック。AngularにおいてはサービスをData Injectionで指定することが規約になっています。
 
-#### Angularのコンポーネントの構成
+### 5.1.3 Angularのコンポーネントの構成
 
-コンポーネントはそのコンポーネント内で指定されている独自のセレクタ条件にマッチするHTMLのタグを,内部に設定されたHTMLテンプレートに置き換えます。これをレンダリングまたは,Angularの場合はコンパイルと呼びます。さらに,そのテンプレート内の一部分をコンポーネントのデータと連動させることができ,ユーザーの操作や通信によってデータが変更された場合に画面表示やそのほかのデータへの影響を即座に反映させることができます。このように内部データ同士の変更や内部データと画面描画を連動させるように設定することをデータバインディングと呼びます。テンプレートにはこのデータバインディングと画面表示を制御するための様々な記法があります(ここでは割愛します)。また,テンプレート内で更にモジュールに定義済みのコンポーネントのセレクタ条件にマッチするタグを埋め込むことで連鎖的にコンポーネントをコンパイルすることができます。以下は単純なコンポーネントの例です。
+コンポーネントはそのコンポーネント内で指定されている独自のセレクタ条件にマッチするHTMLのタグを、内部に設定されたHTMLテンプレートに置き換えます。これをレンダリングまたは、Angularの場合はコンパイルと呼びます。さらに、そのテンプレート内の一部分をコンポーネントのデータと連動させることができ、ユーザーの操作や通信によってデータが変更された場合に画面表示やそのほかのデータへの影響を即座に反映させることができます。このように内部データ同士の変更や内部データと画面描画を連動させるように設定することをデータバインディングと呼びます。テンプレートにはこのデータバインディングと画面表示を制御するための様々な記法があります(ここでは割愛します)。また、テンプレート内で更にモジュールに定義済みのコンポーネントのセレクタ条件にマッチするタグを埋め込むことで連鎖的にコンポーネントをコンパイルすることができます。以下は単純なコンポーネントの例です。
 
 ```ts
 import { Component } from '@angular/core';
@@ -409,32 +420,13 @@ export class AppComponent {
 }
 ```
 
-以上の例では,`<my-app></my-app>`というタグをこのコンポーネントで定義されているテンプレートに置き換え,textboxに入力した文字をh1要素の文字列として即座に反映するコンポーネントの例になります。innerTextではマスタッシュ記法と呼ばれる{{}}で囲まれた文字列を,コンポーネント内の変数の参照に対応させることで,inputの入力には[(ngModel)]="example.text"のように[(ngModel)]の右辺をコンポーネント内の変数の参照に対応させることでデータバインディングを行うことができます。ちなみに[(ngModel)]の[]はinputプロパティの指定に使うシンタックスで内部変数が変更されるとtextboxの文字列も変更されるように単方向データバインディングします。この場合,textboxへの入力は内部変数には反映されません。そして,()はoutputプロパティの指定を表し指定されたプロパティの変更に応じて動作する処理を渡します。[(ngModel)]と指定するとプロパティの値の変更とtextboxの値を連動させ,ユーザーの入力を内部変数の変更と連動させることができます。ただし(ngModel)の指定は機能しません。これは,[ngModel]が内部変数のプロパティにsetterを付加するのに対し,(ngModel)単体の場合は未定義のsetterに対して入力値を代入するというような動作をしていると考えられます。stylesはこのコンポーネントの内部だけで有効なスタイルを指定できます。templateやstylesは外部ファイルに置き換えてパスを指定することもできます。
+以上の例では、`<my-app></my-app>`というタグをこのコンポーネントで定義されているテンプレートに置き換え、textboxに入力した文字をh1要素の文字列として即座に反映するコンポーネントの例になります。innerTextではマスタッシュ記法と呼ばれる{{}}で囲まれた文字列を、コンポーネント内の変数の参照に対応させることで、inputの入力には[(ngModel)]="example.text"のように[(ngModel)]の右辺をコンポーネント内の変数の参照に対応させることでデータバインディングを行うことができます。ちなみに[(ngModel)]の[]はinputプロパティの指定に使うシンタックスで内部変数が変更されるとtextboxの文字列も変更されるように単方向データバインディングします。この場合、textboxへの入力は内部変数には反映されません。そして、()はoutputプロパティの指定を表し指定されたプロパティの変更に応じて動作する処理を渡します。[(ngModel)]と指定するとプロパティの値の変更とtextboxの値を連動させ、ユーザーの入力を内部変数の変更と連動させることができます。ただし(ngModel)の指定は機能しません。これは、[ngModel]が内部変数のプロパティにsetterを付加するのに対し、(ngModel)単体の場合は未定義のsetterに対して入力値を代入するというような動作をしていると考えられます。stylesはこのコンポーネントの内部だけで有効なスタイルを指定できます。templateやstylesは外部ファイルに置き換えてパスを指定することもできます。
 
-### 6 Watson Speech to Textのコンポーネントを作る
+### 6. Watson Speech to Textのコンポーネントを作る
 
 Service、Component、Module等を追加する際にapp.module.tsの設定は必須です。app.module.tsのうち、チュートリアルの過程で新しくAngularクラスを作成した場合は、その都度必要な設定をコピーして設定してください。
 
-### 3.1 Watson Speech to Textを利用する準備
-
-まずサービス用の認証情報を作成します。 [Bluemixコンソール](https://console.bluemix.net)の左上メニューよりWatsonサービスを選択します。
-
-![Screen_Shot_2017-07-24_at_11_59_00.png](https://qiita-image-store.s3.amazonaws.com/0/21849/11febf51-35eb-ad8c-6821-f1a56d6aa2c3.png "Screen_Shot_2017-07-24_at_11_59_00.png")
-
-Watsonサービスの作成を押下後のリストよりSpeech To Textを選択します。
-
-ここでアプリ名は`sample-stt-application`など判別できる名前をつけてください。
-
-サービス資格情報から先ほど作成した資格情報のアクション[資格情報の表示]を選択すると以下のような画面が表示されます。
-
-
-![Screen_Shot_2017-07-24_at_11_53_18.png](https://qiita-image-store.s3.amazonaws.com/0/21849/321e9163-d7f5-86a3-db27-709471fb95b6.png "Screen_Shot_2017-07-24_at_11_53_18.png")
-
-
-このjsonデータは後ほどcredentail.jsonというファイルに書き写します。これで準備完了です。
-
-
-### 開発環境用にAngular用のサーバでExpressサーバのプロキシを行う
+### 6.1 開発環境用にAngular用のサーバでExpressサーバのプロキシを行う
 
 本番環境ではAngular SPAを配信するサーバをExpressに統合しますが、開発環境ではngコマンドを使用している限りAngular用の開発サーバとExpressサーバは別々に起動させて開発することになります。この時、ExpressにAngularコンポーネントから、Expressのサーバにリクエストを飛ばすためにエンドポイントを書き直したり環境変数を使うのは無駄なので、開発用のサーバにプロキシを設定します。ng serveはwebpack-devserverを内部にラップして動かしているので、proxy.config.json(任意の名前で大丈夫です)というファイルを以下の内容で作成して、プロジェクトのルートに配置します。
 
@@ -484,7 +476,7 @@ npm run server
 ```
 で同時にサーバを起動させ、同時にサーバを停止させることが出来るようになります。
 
-### ブラウザからWatson Speech to Textを利用出来るようにする
+### 6.2 ブラウザからWatson Speech to Textを利用出来るようにする
 
 watson-speechというライブラリを使うため、インストールされていなければ以下を実行します。
 
@@ -558,7 +550,7 @@ export class SpeechTextComponent implements OnInit {
 }
 ```
 
-この節に関する処理は全て、speech-text.component.tsのインスタンスメソッドとして、実装していきます。アクセストークンを取得する関数`getTokenAsync`を用意し,ボタンがクリックされたときに音声の録音が開始され、Watsonによってそれらがテキストに変換されたデータを受けとって処理できるようにします。
+この節に関する処理は全て、speech-text.component.tsのインスタンスメソッドとして、実装していきます。アクセストークンを取得する関数`getTokenAsync`を用意し、ボタンがクリックされたときに音声の録音が開始され、Watsonによってそれらがテキストに変換されたデータを受けとって処理できるようにします。
 この処理をhandleMicClickという関数で実装していきます。実装は以下のようになります。
 
 ```ts
@@ -620,7 +612,7 @@ recognizeMicrophoneはwatson-speechというnpmパッケージに入っている
 <button (click)="handleMicClick()">mic start</button>
 ```
 
-以上で、ボタンを押すと、録音を開始して音声認識出来るようになりました。これをAngularアプリケーションのファーストビューで確認できるようにするため、app.component.htmlとapp.component.tsを以下のように書き換えます。
+以上で、ボタンを押すと、録音を開始して音声認識出来るようになりました。これをAngularアプリケーションのファーストビューで確認できるようにするため、app.component.htmlを以下のように書き換えます。
 
 ```html
 <div class="container">
@@ -632,15 +624,15 @@ recognizeMicrophoneはwatson-speechというnpmパッケージに入っている
 
 ![speech-test.png](images/speech-test.png "speech-test.png")
 
-今回用意したslides.data.tsはスライドのデータを直接定義したもので、DBなどからデータを直接受け取る場合は用意する必要はありません。形式上titleキーを設定していますが,今回のアプリケーションでは使用していません。
-## 5 Angularでスライドを作成する
+今回用意したslides.data.tsはスライドのデータを直接定義したもので、DBなどからデータを直接受け取る場合は用意する必要はありません。形式上titleキーを設定していますが、今回のアプリケーションでは使用していません。
 
+## 7. Angularでスライドを作成する
 
-#### 5.1.3 スライドを作るための準備
+### 7.1 スライドを作るための準備
 
 スライドを作成するためにhtmlファイルを文字列型でimportが出来るように設定します。
 angular-cliのデフォルトの設定ではhtmlをraw-loaderで読み込むようになっていますが
-そのimport先の型が定まっていないため,importすることができません。そのため`src/typings.d.ts` に下記のようにhtml拡張子のファイルが読まれた時にどう処理するかの指定を追加します。
+そのimport先の型が定まっていないため、importすることができません。そのため`src/typings.d.ts` に下記のようにhtml拡張子のファイルが読まれた時にどう処理するかの指定を追加します。
 
 ```ts
 declare module "*.html" {
@@ -648,7 +640,7 @@ declare module "*.html" {
   export default content;
 }
 ```
-#### 5.1.4 スライドを作るための構成
+### 7.2 スライドを作るための構成
 
 以下のようなファイル構成でスライド設置用のコンポーネントを作成していきます。
 
@@ -669,12 +661,12 @@ src/app/slides
 
 ```
 
-angular-cli を使用することで,
-`ng g component slides`を実行した後`ng g component slides/slide`と実行し,直接作成する手間を省きます。作成されないファイルについては手動で作成します。
+angular-cli を使用することで、
+`ng g component slides`を実行した後`ng g component slides/slide`と実行し、直接作成する手間を省きます。作成されないファイルについては手動で作成します。
 
-#### 5.1.5 各ファイルの実装
+### 7.3 各ファイルの実装
 
-slides.component.tsはスライド全体を管理するコンポーネントです。@HostListenerによってこのコンポーネントにおけるイベントをフックすることができます。ここでは,LeftキーとRightキーにイベントをフックできるようにしています。
+slides.component.tsはスライド全体を管理するコンポーネントです。@HostListenerによってこのコンポーネントにおけるイベントをフックすることができます。ここでは、LeftキーとRightキーにイベントをフックできるようにしています。
 
 ```ts
 //slides.component.ts
@@ -682,8 +674,6 @@ import {
   HostListener,
   Component,
   Input,
-  Output,
-  EventEmitter,
   OnInit
 } from '@angular/core';
 import {trigger, animate, style, transition, animateChild, group, query, stagger} from '@angular/animations';
@@ -786,7 +776,7 @@ export const SLIDES = [
 ]
 ```
 
-ここで、slide/template/1.html、2.html、3.htmlは任意のHTMLを設定できるので、好きなように設定します。今回
+ここで、slide/template/1.html、2.html、3.htmlは任意のHTMLを設定できるので、好きなように設定します。今回は
 
 ```
 <header>
@@ -796,7 +786,6 @@ export const SLIDES = [
 <p>古写本は題名の記されていないものも多く、<br>記されている場合であっても内容はさまざまである。</p>
 
 ```
-
 
 ```
 <header>
@@ -831,12 +820,12 @@ export const SLIDES = [
 という感じでかなり自由なファイルを３つ作りました。
 
 
-次に、slide.component.tsにスライドの実態となるSlideComponentを作成します。htmlというパラメータを設定することで,任意のDOMをAngularコンポーネントに渡せるようにしています。Angular Animationsに関しては詳細を割愛します。詳しくは,[公式のドキュメント](https://angular.io/guide/animations)を参照してください。
+次に、slide.component.tsにスライドの実態となるSlideComponentを作成します。htmlというパラメータを設定することで、任意のDOMをAngularコンポーネントに渡せるようにしています。Angular Animationsに関しては詳細を割愛します。詳しくは、[公式のドキュメント](https://angular.io/guide/animations)を参照してください。
 
 ```ts
 //slide.component.ts
-import {HostBinding, Component, Input, Output, EventEmitter} from '@angular/core';
-import {trigger, animate, style, transition, animateChild, query} from '@angular/animations';
+import {HostBinding, Component, Input} from '@angular/core';
+import {trigger, animate, style, transition, query} from '@angular/animations';
 
 @Component({
   selector: 'app-slide',
@@ -865,7 +854,7 @@ export class SlideComponent {
 <div [innerHTML]="html" class="page"></div>
 ```
 
-以上でスライド関連のコンポーネントの実装は終わりになります。その後app.module.tsなどのmodule管理に,
+以上でスライド関連のコンポーネントの実装は終わりになります。その後app.module.tsなどのmodule管理に、
 
 ```ts
 //app.module.ts
@@ -891,7 +880,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 })
 ```
 
-の設定を追記し,Routesや
+の設定を追記し、Routesや
 
 ```
 <app-slides></app-slides>
@@ -966,7 +955,7 @@ div.page p  {
 
 ブラウザで確認できたら、エフェクトをつける作業に入ります。
 
-### 4.3 受け取ったデータを元にエフェクトをつける
+## 8. 受け取ったデータを元にエフェクトをつける
 
 Watson Speech to Textから返ってきた文字列を元にスライドにエフェクトを付けていきます。ある特定の文字列がWatsonからのレスポンスに含まれていたら、app.component.htmlの背景にCSSやCanvasでアニメーションを設定します。SpeechTextComponentはAppComponentの子コンポーネントなので、Watsonからレスポンスを受け取ったというイベントトリガーを作成して、親コンポーネントの処理が行われるようにします。このような場合、サービス内でイベントバスを作成してDIされたクラス間のイベントを相互に管理すると実装がシンプルになります。よって以下のように、effect-provider-bus.service.tsを作成します。
 
@@ -1118,7 +1107,7 @@ bgEffectの値がjojoniの値になった時に設定するCSSは以下のよう
 
 ![jojo.gif](images/jojo.gif "jojo.gif")
 
-#### 出来たアプリケーションをデプロイ出来るようにする
+## 9. 出来たアプリケーションをデプロイ出来るようにする
 
 Angularアプリケーション実行に必要なファイルは全て、distに吐き出されるように設定しているので、これをExpressでアクセスできるようにします。server/index.js
 
@@ -1128,24 +1117,24 @@ app.get('/', function(req, res, next) {
   res.render('index');
 });
 ```
-を足します。これによって、/でindex.htmlにアクセスできるようになります。deployする場合は、ng buildを実行してからデプロイを行います。うまくデプロイができてれば、Blumixのホストからコンテンツが見られるようになります。
+を足します。これによって、/でindex.htmlにアクセスできるようになります。deployする場合は、ng buildを実行してからデプロイを行います。うまくデプロイができていれば、Blumixのホストからコンテンツが見られるようになります。
 
 ![jojoni-host.png](images/jojoni-host.png "jojoni-host.png")
 
 以上で、このチュートリアルは終了になります。
 
-#### おまけ
+## 10. おまけ
 
 発表の最後には「ありがとうございました。」と締めることが多いですよね。ということで、ソースコードには、Canvasで、「ありがとう」という言葉が認識されると、花火が打ち上がるコードを収録しています。
 
 ![fireworks.gif](images/fireworks.gif "fireworks.gif")
 
-このようにtemplateにcanvas要素を差し込むことで、Canvasを利用したリッチなアニメーションをつけることも出来ます。実装が気になる方は、ソースコードを見てみてください。
+このようにtemplateにcanvas要素を差し込むことで、Canvasを利用したリッチなアニメーションをつけることも出来ます。実装が気になる方は、ソースコードを覗いてみてください。
 
 
-## 6 終わりに
+## 11. 終わりに
 
-社内社外や学内学外問わず勉強会での登壇やLTなどスライドを用い発表することは様々な機会であるとおもいます。無償有償問わずクールなスライドが世の中に出てきていますが,音声に反応するスライドを作り他の登壇者に差をつけましょう！
+社内社外や学内学外問わず勉強会での登壇やLTなどスライドを用い発表することは様々な機会であるとおもいます。無償有償問わずクールなスライドが世の中に出てきていますが、音声に反応するスライドを作り他の登壇者に差をつけましょう！
 
-またWatsonの他のAPIを利用することでエフェクトを付けるだけでなくリアルタイムで字幕をつけたり,
-Language Translatorを利用して和英/英和の翻訳を施した字幕をつけたりと,よりプレゼンとしての機能を拡張することが出来ます。ぜひお試しください。
+またWatsonの他のAPIを利用することでエフェクトを付けるだけでなくリアルタイムで字幕をつけたり、自動で次のページに遷移させたり、
+Language Translatorを利用して和英/英和の翻訳を施した字幕をつけたりと、よりプレゼンとしての機能を拡張することが出来ます。ぜひお試しください。
